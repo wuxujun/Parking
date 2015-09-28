@@ -1,0 +1,32 @@
+[
+    {
+        "id":1,
+        "title":"语音播报",
+        "type":1,
+        "valueKey":"pre_voice"
+    },
+    {
+        "id":2,
+        "title":"语音类型",
+        "type":2,
+        "valueKey":"pre_voice_type"
+    },
+    {
+        "id":3,
+        "title":"消息推送",
+        "type":1,
+        "valueKey":"pre_notice"
+    },
+    {
+        "id":4,
+        "title":"地图设置",
+        "type":0,
+        "valueKey":"1"
+    },
+    {
+        "id":5,
+        "title":"导航设置",
+        "type":0,
+        "valueKey":"2"
+    }
+]

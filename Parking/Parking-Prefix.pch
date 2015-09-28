@@ -13,4 +13,133 @@
 #ifdef __OBJC__
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
+    #import "blocktypedef.h"
+    #import <OpenUDID.h>
 #endif
+
+#define DB_FILE_NAME  @"parking.sqlite"
+#define kAppId   @"606569eb-5dc8-43d7-935b-ccfa56f5ba4b"
+#define kHttpUrl @"https://api.i-carparking.com:2889/zhtc/"
+
+#define APP_REQUEST_LINKCODE  @"linkCode"
+#define APP_REQUEST_PUBKEY    @"pubKey"
+#define APP_REQUEST_CAPTCHA_ID  @"captchaId"
+#define APP_REQUEST_CAPTCHA_VALUE  @"captchaValue"
+
+#define APP_REQUEST_USER_IDENTITY   @"userIdentity"
+#define APP_REQUEST_USER_EMAIL      @"usermail"
+#define APP_REQUEST_USER_NICKNAME      @"nickname"
+#define APP_REQUEST_USER_MOBILE      @"mobile"
+
+#define CONF_LIST_TO_MAP            @"conf_list_to_map"
+#define CONF_MAP_TO_LIST            @"conf_map_to_list"
+
+#define CONF_PARKING_MAP_TYPE       @"conf_parking_map_type"
+#define CONF_PARKING_MAP_CHARGE       @"conf_parking_map_charge"
+
+
+#define UMENG_APPKEY        @"5243c65756240b98cf06c401"
+#define APPKEY_WEIBO        @"2846029855"
+#define APPSECRET_WEIBO     @"6edd97b068547492519b8eefa084f344"
+#define REDIRECTURI_WEIBO   @"https://hlterm.oicp.net/openapi/ability/index.php/Micblog/callback"
+
+#define APPKEY_TENCENT      @"100334902"
+
+#define AMAP_KEY  @"7b28fb00ccbf0bd3bc4891e039921a24"
+
+#define VOICE_KEYWORD @"{\"userword\":[{\"name\":\"iflytek\",\"words\":[\"金华市政府\",\"金东区政府\",\"婺城区政府\",\"人才市场\",\"金华市行政执法局\",\"金华交警大队\",\"农科教\",\"人力资源和社会保障局\",\"工商局\",\"国土局\",\"金华市检察院\",\"中心医院\",\"人民医院\",\"中医院\",\"第五医院\",\"妇幼保健院\",\"广福医院\",\"文荣医院\",\"眼科医院\",\"口腔医院\",\"金师附小\",\"东苑小学\",\"宾虹小学\",\"站前小学\",\"育才小学\",\"秋滨小学\",\"南苑小学\",\"东关小学\",\"西苑小学\",\"环城小学\",\"江滨小学\",\"曙光小学\",\"青春小学\",\"北苑小学\",\"实验小学\",\"金华九中\",\"金华市外国语学校\",\"金华五中\",\"金华四中\",\"金华十八中\",\"南苑中学\",\"金华十五中\",\"金华一中\",\"艾青中学\",\"江南中学\",\"金华六中\",\"金华八中\",\"浙师大\",\"金职院\",\"金华广播电视大学\",\"上海财经大学浙江学院\",\"银泰天地\",\"银泰福华店\",\"沃尔玛\",\"永盛广场\",\"帝壹城\",\"金华一百\",\"金茂大厦\",\"供销农超\",\"锦绣家居\",\"太阳城\",\"江南一百\",\"银泰福泰隆\",\"世贸中心\",\"金发广场\",\"国美电器\",\"颐高数码\",\"龙腾数码\",\"龙腾服饰城\",\"万达广场\",\"金华商城\",\"新农贸\",\"花鸟市场\",\"青少年宫\",\"金华乐园\",\"浙中乐园\",\"和天下\",\"金典会\",\"agogo量贩KTV\",\"汉方洲\",\"玖玖传奇\",\"白金宫\",\"海上海\",\"迪拜\",\"少林足浴\",\"金华高铁站\",\"汽车南站\",\"汽车西站\",\"汽车东站\",\"火车西站\",\"国贸景澜\",\"世贸饭店\",\"今日大酒店\",\"悦华大酒店\",\"申华大酒店\",\"嘉恒澜庭\",\"金华万达嘉华酒店\",\"天悦五星大酒店\",\"豪森假日酒店\",\"望江饭店\",\"金城国际大酒店\",\"婺景生态园\",\"中华广场\",\"网络经济中心\",\"美保龙\",\"棒棒科技园\",\"浙中模具城\",\"金发广场\",\"环球商务大厦\",\"浙中信息产业园\",\"时代置业\",\"汇金国际\",\"宝莲大厦\",\"莲花井大厦\",\"百盛大厦\",\"丽晶国际商务大厦\",\"八咏大厦\",\"新都会\",\"当代江南\",\"南国名城\",\"绿城海棠花园\",\"当代华府\",\"香格里花园\",\"泰地.世锦园\",\"米兰花园\",\"三江国际\",\"万达花园\",\"保集半岛\",\"保集蓝郡\",\"蓝湾国际\",\"欧景名城\",\"家和园\",\"时代花园\",\"御江帝景\",\"东方明珠\",\"东华家园\",\"广润翰城\",\"婺州公园\",\"凤凰山公园\",\"市民广场\",\"人民广场\",\"艾青公园\",\"樱花公园\",\"月亮湾公园\",\"茶花园\",\"皇宾虹公园\",\"燕尾洲公园\",\"体育中心\",\"金龙湾公园\",\"梅园\",\"回溪公园\",\"青春公园\",\"清风公园\",\"环北公园\",\"环东公园\",\"五星公园\",\"施光南音乐广场\"]}]}"
+
+#define SCREEN_WIDTH    ([UIScreen mainScreen].bounds.size.width)
+#define SCREEN_HEIGHT   ([UIScreen mainScreen].bounds.size.height)
+#define SCREEN_SIZE     ([UIScreen mainScreen].bounds)
+
+#define ApplicationDelegate                 ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
+#define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define IS_IPHONE (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+#define IS_IPHONE_5 (IS_IPHONE && [[UIScreen mainScreen] bounds].size.height == 568.0f)
+#define IS_RETINA ([[UIScreen mainScreen] scale] == 2.0f)
+
+
+#define IOS_VERSION_7_OR_ABOVE (([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0)? (YES):(NO))
+#define IOS_VERSION_8_OR_ABOVE (([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)? (YES):(NO))
+
+//04a3fe
+#define DEFAULT_NAVIGATION_BACKGROUND_COLOR   [UIColor colorWithRed:4.0f/255.0f green:163.0f/255.0f blue:254.0f/255.0f alpha:1.0f]
+
+#define DEFAULT_BUTTON_BACKGROUND_COLOR   [UIColor colorWithRed:193.0f/255.0f green:193.0f/255.0f blue:193.0f/255.0f alpha:0.7f]
+
+#define DEFAULT_FONT_COLOR  [UIColor colorWithRed:62/255.0f green:68/255.0f blue:75/255.0f alpha:1.0f]
+#define SELECTED_FONT_COLOR [UIColor colorWithRed:62/255.0f green:68/255.0f blue:75/255.0f alpha:1.0f]
+#define DEFAULT_LINE_COLOR  [UIColor colorWithRed:218/255.0f green:218/255.0f blue:218/255.0f alpha:1.0f]
+#define DEFAULT_VIEW_BACKGROUND_COLOR  [UIColor colorWithRed:252/255.0f green:252/255.0f blue:252/255.0f alpha:1.0f]
+
+
+#if TARGET_IPHONE_SIMULATOR
+#define DEVICE_UDID     @"1234567890abcdefghij1234567890abcdefghij"
+#else
+#define DEVICE_UDID     [OpenUDID value]
+#endif
+
+
+#ifdef DEBUG
+#define HLog(format,...) NSLog([NSString stringWithFormat:@"\n%sLine%d:\n%@",__FUNCTION__,__LINE__,format],## __VA_ARGS__)
+#define HLogRect(rect)   HLog(@"%@",NSStringFormCGRect(rect));
+#else
+#define HLog(format,...)
+#define HLogRect(rect)
+#endif
+
+#define SAFE_RELEASE(var)       [var release];var=nil;
+
+#define RGBCOLOR(r,g,b)      [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:1.0]
+#define RGBACOLOR(r,g,b,a)      [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
+
+#define LoadingImageBackgroundColor RGBCOLOR(203, 203, 203)
+
+#define NOTIFICATION_OPEN_TYPE @"kNotificationOpenType"
+#define NOTIFICATION_SEARCH_KEYWORK @"kNotificationSearchKeyword"
+#define NOTIFICATION_SEARCH_HIS_KEYWORK @"kNotificationSearchHisKeyword"
+#define NOTIFICATION_SEARCH_TIP @"kNotificationSearchTip"
+
+#define CONF_DATABASE_VERSION    @"conf_database_version"
+
+#define CONF_PARKING_STATUS  @"conf_parking_status"
+#define CONF_PARKING_MOVE_SHOW  @"conf_parking_move_show"
+
+#define CONF_CURRENT_LAYER_TYPE   @"conf_current_layer_type"
+
+#define CONF_LOCATION_LATITUDE  @"conf_location_latitude"
+#define CONF_LOCATION_LONGITUDE  @"conf_location_longitude"
+#define CONF_CURRENT_TARGET_LATITUDE @"conf_current_target_latitude"
+#define CONF_CURRENT_TARGET_LONGITUDE @"conf_current_target_longitude"
+
+
+#define PRE_LOGIN_USER  @"login_user"
+#define PRE_LOGIN_PASSWORD @"login_password"
+
+#define PRE_VOICE   @"pre_voice"
+#define PRE_VOICE_TYPE @"pre_voice_type"
+#define PRE_NOTICE     @"pre_notice"
+
+#define PRE_MAP_ZOOM    @"pre_map_zoom"
+#define PRE_MAP_SUBMIT  @"pre_map_submit"
+#define PRE_MAP_WIFI_DOWN   @"pre_map_wifi_down"
+
+#define PRE_NAVI_MODE_JAM   @"pre_navi_mode_jam"
+#define PRE_NAVI_MODE_HIGHWAY  @"pre_navi_mode_highway"
+#define PRE_NAVI_MODE_CHARGE   @"pre_navi_mode_charge"
+#define PRE_NAVI_EMULATOR  @"pre_navi_emulator"
+
+
+#define SYSTEM_SMALL_FONT   @"small font"
+#define SYSTEM_LARGE_FONT   @"large font"
+#define SYSTEM_MID_FONT     @"default font"
+#define SYSTEM_FONT_KEY     @"system font"
+
+#define SYSTEM_LARGE_IMAGE  @"large image"
+#define SYSTEM_SMALL_IMAGE  @"small image"
+#define SYSTEM_IMAGE_KEY    @"system image"
+
+typedef void(^VoidBlock)();
+typedef void(^VoidBlock_int)(int idx);

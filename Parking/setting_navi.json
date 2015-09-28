@@ -1,0 +1,23 @@
+[
+    {
+        "id":1,
+        "title":"路线偏好",
+        "type":3,
+        "valueKey":"0",
+        "datas":[
+            {
+                "id":1,"title":"躲避拥堵","valueKey":"pre_navi_mode_jam"
+            },{
+                 "id":2,"title":"不走高速","valueKey":"pre_navi_mode_highway"
+            },{
+                 "id":3,"title":"避免收费","valueKey":"pre_navi_mode_charge"
+            }
+        ]
+    },
+    {
+        "id":2,
+        "title":"模拟导航",
+        "type":1,
+        "valueKey":"pre_navi_emulator"
+    }
+]

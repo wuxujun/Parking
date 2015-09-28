@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1811" systemVersion="12C60" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Images" representedClassName="Image" syncable="YES">
+        <attribute name="createDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="data" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="url" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="Netdata" representedClassName="NData" syncable="YES">
+        <attribute name="changeD" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="createD" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="data" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="fileid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fname" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="furl" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="netType" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+    </entity>
+    <entity name="Netstore" representedClassName="Netstore" syncable="YES">
+        <attribute name="addtime" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="data" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="fileid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="folderType" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="netType" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Images" positionX="160" positionY="192" width="128" height="103"/>
+        <element name="Netdata" positionX="-9" positionY="54" width="128" height="148"/>
+        <element name="Netstore" positionX="-209" positionY="135" width="128" height="118"/>
+    </elements>
+</model>

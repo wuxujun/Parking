@@ -1,0 +1,20 @@
+[
+    {
+        "id":1,
+        "title":"放大缩小按钮",
+        "type":1,
+        "valueKey":"pre_map_zoom"
+    },
+    {
+        "id":2,
+        "title":"上报按钮",
+        "type":1,
+        "valueKey":"pre_map_submit"
+    },
+    {
+        "id":3,
+        "title":"WIFI下载离线地图",
+        "type":1,
+        "valueKey":"pre_map_wifi_down"
+    }
+]
