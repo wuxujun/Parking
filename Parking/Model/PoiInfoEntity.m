@@ -28,6 +28,10 @@
         self.totalCount=[value intValue];
     }else if([key isEqualToString:@"freeCount"]){
         self.freeCount=[value intValue];
+    }else if([key isEqualToString:@"freeStatus"]){
+        self.freeStatus=value;
+    }else if([key isEqualToString:@"parkRiveType"]){
+        self.parkRiveType=value;
     }else if([key isEqualToString:@"charge"]){
         self.charge=value;
     }else if([key isEqualToString:@"chargeDetail"]){
@@ -63,7 +67,7 @@
 
 +(NSArray*)fields
 {
-    return [NSArray arrayWithObjects:@"pid",@"poiId",@"typeDes",@"idx",@"title",@"address",@"distance",@"totalCount",@"freeCount",@"charge",@"chargeDetail",@"price",@"latitude",@"longitude",@"sourceType",@"dataType",@"cityCode",@"adCode", nil];
+    return [NSArray arrayWithObjects:@"pid",@"poiId",@"typeDes",@"idx",@"title",@"address",@"distance",@"totalCount",@"freeCount",@"charge",@"chargeDetail",@"price",@"latitude",@"longitude",@"sourceType",@"dataType",@"cityCode",@"adCode",@"freeStatus",@"parkRiveType", nil];
 }
 
 + (void)generateInsertSql:(NSDictionary *)aInfo completion:(SqlBlock)completion

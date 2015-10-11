@@ -38,13 +38,17 @@
 @interface SubmitLayerPopup()<UITextFieldDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate>
 {
     UITextField         *contentField;
+    UILabel             *mapSelLabel;
     UIButton            *mapSelBtn;
+    UILabel             *photoSelLabel;
     UIButton            *photoSelBtn;
     UIButton            *submitBtn;
     
     NSString            *fileName;
     NSString            *filePath;
     
+    BOOL                isMapSel;
+    BOOL                isPhotoSel;
 }
 @property(nonatomic,strong)UIButton     *containerButton;
 
@@ -87,11 +91,30 @@
         
         [self addSubview:menuItemsTableView];
         
+        isMapSel=NO;
+        isPhotoSel=NO;
         [self.containerButton addSubview:self];
     }
     return self;
 }
 
+-(void)setMapPoint:(NSDictionary *)dict
+{
+    if (mapSelLabel) {
+        [mapSelLabel setText:@"已选点"];
+    }
+    isMapSel=YES;
+}
+
+-(void)setPhotoInfo:(NSDictionary*)dict
+{
+    if (photoSelLabel) {
+        [photoSelLabel setText:@"已拍照"];
+    }
+    fileName=[dict objectForKey:@"image"];
+    filePath=[NSString stringWithFormat:@"%@/%@",[[AppConfig getInstance] getPhotoFilePath],fileName];
+    isPhotoSel=YES;
+}
 
 -(IBAction)onButton:(id)sender
 {
@@ -102,10 +125,15 @@
             break;
         }
         case 2:{
+            if ([delegate respondsToSelector:@selector(onSubmitContent:forIndex:)]) {
+                [delegate onSubmitContent:self forIndex:btn.tag];
+            }
             break;
         }
         case 3:{
-            
+            if ([delegate respondsToSelector:@selector(onSubmitContent:forIndex:)]) {
+                [delegate onSubmitContent:self forIndex:btn.tag];
+            }
             break;
         }
         case 4:
@@ -114,34 +142,55 @@
             break;
         }
     }
-    
-//    if ([delegate respondsToSelector:@selector(viewSwitch:forIndex:)]) {
-//        [delegate viewSwitch:self forIndex:btn.tag];
-//    }
 }
 
 -(void)submit
 {
+    if (!isMapSel&&!isPhotoSel) {
+        if ([delegate respondsToSelector:@selector(showSubmitMessage:)]) {
+            [delegate showSubmitMessage:@"请地图选点或拍照"];
+        }
+        return;
+    }
+    
     [self showHUDLoadingView:YES];
     NSString* requestUrl=[NSString stringWithFormat:@"%@report_parking",kHttpUrl];
     NSMutableDictionary* params=[[NSMutableDictionary alloc]init];
     [params setObject:@"1" forKey:@"reportType"];
     [params setObject:[NSString stringWithFormat:@"%@",contentField.text] forKey:@"reportName"];
     
-    [params setObject:[NSString stringWithFormat:@"%@",contentField.text] forKey:@"reportLongti"];
-    [params setObject:[NSString stringWithFormat:@"%@",contentField.text] forKey:@"reportLati"];
-    [params setObject:[NSString stringWithFormat:@"%@",contentField.text] forKey:@"reportPhoto"];
+    [params setObject:[NSString stringWithFormat:@"%.6f",[[UserDefaultHelper objectForKey:CONF_MAP_SELECT_LAT] floatValue]] forKey:@"reportLongti"];
+    [params setObject:[NSString stringWithFormat:@"%.6f",[[UserDefaultHelper objectForKey:CONF_MAP_SELECT_LNG] floatValue]] forKey:@"reportLati"];
+    if (isPhotoSel&&filePath) {
+        NSData* data=[NSData dataWithContentsOfFile:filePath];
+        NSString * baseStr=[data base64EncodedString];
+        NSString *baseString = (__bridge NSString *) CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
+                                                                                             (CFStringRef)baseStr,
+                                                                                             NULL,
+                                                                                             CFSTR(":/?#[]@!$&’()*+,;="),
+                                                                                             kCFStringEncodingUTF8);
+        
+        [params setObject:[NSString stringWithFormat:@"%@",baseString] forKey:@"reportPhoto"];
+    }
     
     [self.networkEngine postOperationWithURLString:requestUrl params:params success:^(MKNetworkOperation *completedOperation, id result) {
         [self showHUDLoadingView:NO];
+        HLog(@"%@",result);
         if([[result objectForKey:@"status"] intValue]==200){
-            
+            if ([delegate respondsToSelector:@selector(showSubmitMessage:)]) {
+                [delegate showSubmitMessage:@"操作成功"];
+            }
         }else{
-            
+            if ([delegate respondsToSelector:@selector(showSubmitMessage:)]) {
+                [delegate showSubmitMessage:@"操作失败"];
+            }
         }
     } error:^(NSError *error) {
         HLog(@"%@",error);
         [self showHUDLoadingView:NO];
+        if ([delegate respondsToSelector:@selector(showSubmitMessage:)]) {
+            [delegate showSubmitMessage:@"网络请求失败"];
+        }
     }];
 }
 
@@ -212,12 +261,12 @@
         [mapSelBtn addSubview:iv1];
         
         
-        UILabel* lb1=[[UILabel alloc]initWithFrame:CGRectMake(0, 20+56, w, 26)];
-        [lb1 setText:@"地图精确选点"];
-        [lb1 setFont:[UIFont systemFontOfSize:14.0f]];
-        [lb1 setTextColor:DEFAULT_FONT_COLOR];
-        [lb1 setTextAlignment:NSTextAlignmentCenter];
-        [mapSelBtn addSubview:lb1];
+        mapSelLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 20+56, w, 26)];
+        [mapSelLabel setText:@"地图精确选点"];
+        [mapSelLabel setFont:[UIFont systemFontOfSize:14.0f]];
+        [mapSelLabel setTextColor:DEFAULT_FONT_COLOR];
+        [mapSelLabel setTextAlignment:NSTextAlignmentCenter];
+        [mapSelBtn addSubview:mapSelLabel];
         
         [cell addSubview:mapSelBtn];
         
@@ -228,12 +277,12 @@
         [iv2 setFrame:CGRectMake((w-56)/2, 15, 56, 56)];
         [photoSelBtn addSubview:iv2];
         
-        UILabel* lb2=[[UILabel alloc]initWithFrame:CGRectMake(0, 20+56, w, 26)];
-        [lb2 setText:@"实时拍照"];
-        [lb2 setFont:[UIFont systemFontOfSize:14.0f]];
-        [lb2 setTextColor:DEFAULT_FONT_COLOR];
-        [lb2 setTextAlignment:NSTextAlignmentCenter];
-        [photoSelBtn addSubview:lb2];
+        photoSelLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 20+56, w, 26)];
+        [photoSelLabel setText:@"实时拍照"];
+        [photoSelLabel setFont:[UIFont systemFontOfSize:14.0f]];
+        [photoSelLabel setTextColor:DEFAULT_FONT_COLOR];
+        [photoSelLabel setTextAlignment:NSTextAlignmentCenter];
+        [photoSelBtn addSubview:photoSelLabel];
         
         [cell addSubview:photoSelBtn];
     

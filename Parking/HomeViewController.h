@@ -9,19 +9,21 @@
 #import "BMapViewController.h"
 #import <AMapNaviKit/MAMapKit.h>
 #import <AMapSearchKit/AMapSearchAPI.h>
-#import <UMSocial.h>
+#import "UMSocial.h"
+#import "DMLazyScrollView.h"
 #import "SearchHisEntity.h"
 
 @interface HomeViewController : BMapViewController<AMapSearchDelegate,UMSocialUIDelegate>
 
 -(void)selectPOIAnnotationForIndex:(NSInteger)idx;
 -(void)clearAllAnnotationPOI;
--(void)clearAnnotationPOI:(NSInteger)type;
 
 -(void)openViewController:(int)type;
 -(void)searchForKeyword:(NSDictionary*)dict;
 -(void)searchHisForKeyword:(SearchHisEntity*)entity;
 -(void)searchForAMapPOI:(AMapPOI*)poi;
 -(void)searchForAMapTip:(AMapTip* )tip;
+-(void)searchNearbyForKeyword:(NSDictionary*)dict;
+-(void)onMapSelectDone:(NSDictionary*)dict;
 
 @end

@@ -74,7 +74,9 @@
 
 -(IBAction)passRequest:(id)sender
 {
+    [[HCurrentUserContext sharedInstance] clearUserInfo];
     ForgetPassController* dController=[[ForgetPassController alloc]init];
+    dController.dataType=0;
     [self.navigationController pushViewController:dController animated:YES];
 }
 
@@ -100,6 +102,7 @@
             [UserDefaultHelper setObject:passwordStr forKey:PRE_LOGIN_PASSWORD];
             [myself.navigationController popViewControllerAnimated:YES];
         } error:^(NSError *error) {
+            [self alertRequestResult:@"登录失败"];
             [myself.view showHUDLoadingView:NO];
         }];
     }
@@ -149,7 +152,7 @@
             [self.userField setReturnKeyType:UIReturnKeyNext];
             [self.userField setClearButtonMode:UITextFieldViewModeWhileEditing];
             [self.userField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
-            [self.userField setValue:DEFAULT_FONT_COLOR forKeyPath:@"_placeholderLabel.textColor"];
+            [self.userField setValue:DEFAULT_LINE_COLOR forKeyPath:@"_placeholderLabel.textColor"];
             if (IOS_VERSION_7_OR_ABOVE) {
                 [self.userField setTintColor:DEFAULT_FONT_COLOR];
             }
@@ -192,7 +195,7 @@
             [self.passField setReturnKeyType:UIReturnKeyGo];
             [self.passField setClearButtonMode:UITextFieldViewModeWhileEditing];
             [self.passField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
-            [self.passField setValue:DEFAULT_FONT_COLOR forKeyPath:@"_placeholderLabel.textColor"];
+            [self.passField setValue:DEFAULT_LINE_COLOR forKeyPath:@"_placeholderLabel.textColor"];
             [self.passField.layer setMasksToBounds:YES];
             [self.passField.layer setCornerRadius:5.0f];
             [self.passField.layer setBorderWidth:1.0];

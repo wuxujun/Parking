@@ -19,6 +19,8 @@ typedef void(^SqlBlock)(NSString* sql,NSArray *arguments);
 @property(nonatomic,assign) NSInteger   distance;
 @property(nonatomic,assign) NSInteger   totalCount;
 @property(nonatomic,assign) NSInteger   freeCount;
+@property(nonatomic,strong) NSString*   freeStatus;
+@property(nonatomic,strong) NSString*   parkRiveType;
 @property(nonatomic,strong) NSString*   charge;
 @property(nonatomic,strong) NSString*   chargeDetail;
 @property(nonatomic,assign) NSInteger   price;

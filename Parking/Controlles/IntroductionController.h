@@ -6,9 +6,9 @@
 //  Copyright (c) 2015年 ___Hongkui___. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import "BViewController.h"
 
-@interface IntroductionController : UIViewController
+@interface IntroductionController : BViewController
 
 @property(nonatomic,assign) NSInteger       dataType;
 @end

@@ -19,8 +19,6 @@
 #import "DetailViewController.h"
 #import "BListViewController.h"
 
-
-
 @interface SearchMapViewController ()<UISearchDisplayDelegate,UISearchBarDelegate,UITableViewDelegate,UITableViewDataSource,ListViewCellDelegate>
 {
     IFlyRecognizerView      *mIFlyRecognizerView;

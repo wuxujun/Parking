@@ -24,6 +24,20 @@
     return downPath;
 }
 
+-(NSString*)getPhotoFilePath
+{
+    NSError* error;
+    NSFileManager *fileManager=[NSFileManager defaultManager];
+    NSString* documentDir=[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+    NSString *path=[NSString stringWithFormat:@"%@/Photo",documentDir];
+    if ([fileManager fileExistsAtPath:path]) {
+        
+    }else{
+        [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error];
+    }
+    return path;
+}
+
 -(void)saveUserInfo:(NSString *)userName pwd:(NSString *)password
 {
     NSUserDefaults *settings=[NSUserDefaults standardUserDefaults];
@@ -111,13 +125,83 @@
     }
 }
 
+-(NSString*)getTMapIcon:(NSInteger)idx isSelect:(BOOL)sel
+{
+    NSString *img=@"default_generalsearch_poi_1_highlight";
+    switch (idx) {
+        case 0:
+            img=@"default_generalsearch_poi_1_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_1_normal";
+            }
+            break;
+        case 1:
+            img=@"default_generalsearch_poi_2_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_2_normal";
+            }
+            break;
+        case 2:
+            img=@"default_generalsearch_poi_3_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_3_normal";
+            }
+            break;
+        case 3:
+            img=@"default_generalsearch_poi_4_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_4_normal";
+            }
+            break;
+        case 4:
+            img=@"default_generalsearch_poi_5_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_5_normal";
+            }
+            break;
+        case 5:
+            img=@"default_generalsearch_poi_6_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_6_normal";
+            }
+            break;
+        case 6:
+            img=@"default_generalsearch_poi_7_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_7_normal";
+            }
+            break;
+        case 7:
+            img=@"default_generalsearch_poi_8_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_8_normal";
+            }
+            break;
+        case 8:
+            img=@"default_generalsearch_poi_9_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_9_normal";
+            }
+            break;
+        case 9:
+            img=@"default_generalsearch_poi_10_highlight";
+            if (sel) {
+                img=@"default_generalsearch_poi_0_normal";
+            }
+            break;
+        default:
+            break;
+    }
+    return img;
+}
+
 -(NSString*)getMapIcon:(int)dataType isSelect:(BOOL)sel fee:(NSString*)aFee count:(int)aCount
 {
     NSString* img=@"ic_parking_blue";
     if (dataType==1) {
         if (aFee==(id)[NSNull null]||aFee.length==0) {
             img=@"ic_parking";
-        }else if([aFee isEqualToString:@"1"]) {
+        }else if([aFee isEqualToString:@"收费"]) {
             img=@"ic_parking_blue_fee";
             if (aCount<5) {
                 img=@"ic_parking_red_fee";
@@ -126,7 +210,7 @@
             }else if(aCount>15){
                 img=@"ic_parking_green_fee";
             }
-        }else if([aFee isEqualToString:@"0"]){
+        }else if([aFee isEqualToString:@"免费"]){
             if (aCount<6) {
                 img=@"ic_parking_red";
             }else if(aCount>5&&aCount<16){
@@ -134,7 +218,7 @@
             }else if(aCount>15){
                 img=@"ic_parking_green";
             }
-
+            
         }else{
             img=@"ic_parking";
         }
@@ -142,7 +226,7 @@
             img=@"ic_parking_blue_s2";
             if (aFee==(id)[NSNull null]||aFee.length==0) {
                 img=@"ic_parking_s2";
-            }else if ([aFee isEqualToString:@"1"]) {
+            }else if ([aFee isEqualToString:@"收费"]) {
                 img=@"ic_parking_blue_fee_s2";
                 if (aCount<5) {
                     img=@"ic_parking_red_fee_s2";
@@ -151,12 +235,92 @@
                 }else if(aCount>15){
                     img=@"ic_parking_green_fee_s2";
                 }
-            }else if([aFee isEqualToString:@"0"]){
+            }else if([aFee isEqualToString:@"免费"]){
                 if (aCount<5) {
                     img=@"ic_parking_red_s2";
                 }else if(aCount>5&&aCount<15){
                     img=@"ic_parking_org_s2";
                 }else if(aCount>15){
+                    img=@"ic_parking_green_s2";
+                }
+            }else{
+                img=@"ic_parking_s2";
+            }
+        }
+    }else if (dataType==2) {
+        //        img=@"ic_bicycle_blue";
+        //        if (aCount<5) {
+        //            img=@"ic_bicycle_red";
+        //        }else if(aCount>5&&aCount<15){
+        img=@"ic_bicycle_org";
+        //        }else if(aCount>15){
+        //            img=@"ic_bicycle_green";
+        //        }
+        if (sel) {
+            //            img=@"ic_bicycle_blue_s2";
+            //            if (aCount<5) {
+            //                img=@"ic_bicycle_red_s2";
+            //            }else if(aCount>5&&aCount<15){
+            img=@"ic_bicycle_org_s2";
+            //            }else if(aCount>15){
+            //                img=@"ic_bicycle_green_s2";
+            //            }
+        }
+    }else if(dataType==3){
+        img=@"ic_bus_org";
+        if (sel) {
+            img=@"ic_bus_org_s2";
+        }
+    }
+    return img;
+}
+
+
+-(NSString*)getMapIcon:(int)dataType isSelect:(BOOL)sel fee:(NSString*)aFee status:(NSString*)aStatus
+{
+    NSString* img=@"ic_parking_blue";
+    if (dataType==1) {
+        if (aFee==(id)[NSNull null]||aFee.length==0) {
+            img=@"ic_parking";
+        }else if([aFee isEqualToString:@"收费"]) {
+            img=@"ic_parking_blue_fee";
+            if ([aStatus isEqualToString:@"紧缺"]) {
+                img=@"ic_parking_red_fee";
+            }else if([aStatus isEqualToString:@"较少"]){
+                img=@"ic_parking_org_fee";
+            }else if([aStatus isEqualToString:@"充足"]){
+                img=@"ic_parking_green_fee";
+            }
+        }else if([aFee isEqualToString:@"免费"]){
+            if ([aStatus isEqualToString:@"紧缺"]) {
+                img=@"ic_parking_red";
+            }else if([aStatus isEqualToString:@"较少"]){
+                img=@"ic_parking_org";
+            }else if([aStatus isEqualToString:@"充足"]){
+                img=@"ic_parking_green";
+            }
+        }else{
+            img=@"ic_parking";
+        }
+        if (sel) {
+            img=@"ic_parking_blue_s2";
+            if (aFee==(id)[NSNull null]||aFee.length==0) {
+                img=@"ic_parking_s2";
+            }else if ([aFee isEqualToString:@"收费"]) {
+                img=@"ic_parking_blue_fee_s2";
+                if ([aStatus isEqualToString:@"紧缺"]) {
+                    img=@"ic_parking_red_fee_s2";
+                }else if([aStatus isEqualToString:@"较少"]){
+                    img=@"ic_parking_org_fee_s2";
+                }else if([aStatus isEqualToString:@"充足"]){
+                    img=@"ic_parking_green_fee_s2";
+                }
+            }else if([aFee isEqualToString:@"免费"]){
+                if ([aStatus isEqualToString:@"紧缺"]) {
+                    img=@"ic_parking_red_s2";
+                }else if([aStatus isEqualToString:@"较少"]){
+                    img=@"ic_parking_org_s2";
+                }else if([aStatus isEqualToString:@"充足"]){
                     img=@"ic_parking_green_s2";
                 }
             }else{

@@ -9,13 +9,13 @@
 #import "BMapViewController.h"
 #import "SIAlertView.h"
 #import <AudioToolbox/AudioToolbox.h>
-#import <CoreLocation/CoreLocation.h>
-#import <CoreLocation/CLLocationManagerDelegate.h>
 #import "SearchViewController.h"
 #import "POIAnnotation.h"
 #import "CustPOIAnnotation.h"
 #import "KeyPOIAnnotation.h"
 #import "UIImage+TextMask.h"
+#import "UIView+LoadingView.h"
+#import "UserDefaultHelper.h"
 
 @interface BMapViewController ()<CLLocationManagerDelegate>
 {
@@ -27,7 +27,6 @@
 }
 
 @property (nonatomic,strong)MAAnnotationView *userLocationAnnotationView;
-
 @end
 
 @implementation BMapViewController
@@ -41,6 +40,9 @@
     if (IOS_VERSION_7_OR_ABOVE) {
         self.navigationController.navigationBar.barTintColor=DEFAULT_NAVIGATION_BACKGROUND_COLOR;
     }
+    UIBarButtonItem* backBtn=[[UIBarButtonItem alloc]init];
+    backBtn.title=@"返回";
+    self.navigationItem.backBarButtonItem=backBtn;
     
     if ([CLLocationManager locationServicesEnabled]) {
         locManager=[[CLLocationManager alloc] init];
@@ -96,15 +98,15 @@
     
 }
 
-//-(UIStatusBarStyle)preferredStatusBarStyle
-//{
-//    return UIStatusBarStyleLightContent;
-//}
-//
-//-(BOOL)prefersStatusBarHidden
-//{
-//    return NO;
-//}
+-(UIStatusBarStyle)preferredStatusBarStyle
+{
+    return UIStatusBarStyleLightContent;
+}
+
+-(BOOL)prefersStatusBarHidden
+{
+    return NO;
+}
 
 - (void)didReceiveMemoryWarning
 {
@@ -140,13 +142,13 @@
 
 -(MAOverlayView*)mapView:(MAMapView *)mapView viewForOverlay:(id<MAOverlay>)overlay
 {
-    if (overlay==mapView.userLocationAccuracyCircle) {
-        MACircleView *aview=[[MACircleView alloc]initWithCircle:overlay];
-        aview.lineWidth=2.0;
-        aview.strokeColor=[UIColor lightGrayColor];
-        aview.fillColor=[UIColor colorWithRed:1 green:0 blue:0 alpha:3];
-        return aview;
-    }
+//    if (overlay==mapView.userLocationAccuracyCircle) {
+//        MACircleView *aview=[[MACircleView alloc]initWithCircle:overlay];
+//        aview.lineWidth=2.0;
+//        aview.strokeColor=[UIColor lightGrayColor];
+//        aview.fillColor=[UIColor colorWithRed:1 green:0 blue:0 alpha:3];
+//        return aview;
+//    }
     return nil;
 }
 
@@ -159,6 +161,7 @@
         }
         anView.image=[UIImage imageNamed:@"userPosition"];
         self.userLocationAnnotationView=anView;
+        self.userLocationAnnotation=annotation;
         return anView;
     }
     return nil;
@@ -167,11 +170,10 @@
 -(void)mapView:(MAMapView *)mapView didUpdateUserLocation:(MAUserLocation *)userLocation updatingLocation:(BOOL)updatingLocation
 {
     if (updatingLocation&&self.userLocationAnnotationView!=nil) {
-//        [UIView animateWithDuration:0.1 animations:^{
-//            double degree=userLocation.heading.trueHeading-self.mapView.rotationDegree;
-//            self.userLocationAnnotationView.transform=CGAffineTransformMakeRotation(degree*M_PI/180.0f);
-        
-//        }];
+        [UIView animateWithDuration:0.1 animations:^{
+            double degree=userLocation.heading.trueHeading-self.mapView.rotationDegree;
+            self.userLocationAnnotationView.transform=CGAffineTransformMakeRotation(degree*M_PI/180.0f);  
+        }];
     }
 }
 
@@ -259,6 +261,8 @@
 
 -(void)searchForVoiceKeyword:(NSString *)keyword
 {
+    [UserDefaultHelper setObject:@"0" forKey:CONF_MAP_TO_LIST];
+    [UserDefaultHelper setObject:@"0" forKey:CONF_LIST_TO_MAP];
     SearchViewController* dController=[[SearchViewController alloc]init];
     dController.searchType=1;
     dController.searchKeyword=keyword;
@@ -282,5 +286,7 @@
     });
     
 }
+
+
 
 @end

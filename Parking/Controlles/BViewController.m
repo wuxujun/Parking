@@ -179,7 +179,24 @@
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         [alertView dismissAnimated:YES];
     });
+}
+
+-(void)alertRequestResult:(NSString*)message isPop:(BOOL)flag
+{
+    SIAlertView *alertView=[[SIAlertView alloc]initWithTitle:nil andMessage:message];
+    [alertView addButtonWithTitle:@"2秒后自动关闭" type:SIAlertViewButtonTypeCancel handler:^(SIAlertView *alertView){
+        [alertView dismissAnimated:YES];
+    }];
+    [alertView show];
     
+    double delayInSeconds = 2.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [alertView dismissAnimated:YES];
+        if (flag) {
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    });
 }
 
 @end

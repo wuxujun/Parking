@@ -21,25 +21,25 @@
     [self setCenterTitle:@"消息中心"];
     self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithTitle:@"清空" style:UIBarButtonItemStylePlain target:self action:@selector(onClear:)];
     _tableView.separatorStyle=UITableViewCellSeparatorStyleSingleLine;
+    [self initHeadView];
+}
+
+-(void)initHeadView
+{
+    UIView* headView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 54)];
+    
+    UILabel* lb=[[UILabel alloc]initWithFrame:CGRectMake(10, (54-36)/2, SCREEN_WIDTH-20, 36)];
+    [lb setText:@"暂时没有收到信息消息"];
+    [lb setTextAlignment:NSTextAlignmentCenter];
+    [lb setTextColor:DEFAULT_FONT_COLOR];
+    [headView addSubview:lb];
+    [_tableView setTableHeaderView:headView];
+    
 }
 
 -(void)loadData
 {
-    NSString* fileName=@"notice";
-    NSData *jsdata = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:fileName ofType:@"json"]];
-    @autoreleasepool {
-        
-        if (jsdata)
-        {
-            NSArray *dicArray = [NSJSONSerialization JSONObjectWithData:jsdata options:NSJSONReadingAllowFragments error:nil];
-            
-            for (NSDictionary *dic in dicArray)
-            {
-                [_datas addObject:dic];
-            }
-            [_tableView reloadData];
-        }
-    }
+    
     
 }
 

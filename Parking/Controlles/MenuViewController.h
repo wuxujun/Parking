@@ -9,6 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "REFrostedViewController.h"
 
-@interface MenuViewController : UITableViewController
+@interface MenuViewController : UIViewController
 
 @end

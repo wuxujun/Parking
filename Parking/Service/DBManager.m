@@ -102,7 +102,7 @@ static DBManager *sharedDBManager=nil;
 
 -(BOOL)insertOrUpdatePoiInfo:(NSDictionary *)info
 {
-    NSInteger count = [self queryCollectCountWithId:info[@"poiId"]];
+    NSInteger count = [self queryPoiInfoCountWithId:info[@"poiId"]];
     __block BOOL isSuccess;
     if (count == 0) {
         [PoiInfoEntity generateInsertSql:info completion:^(NSString *sql, NSArray *arguments) {
@@ -129,24 +129,24 @@ static DBManager *sharedDBManager=nil;
 
 -(NSArray*)queryPoiInfo
 {
-     return [DBHelper queryAll:[PoiInfoEntity class] conditions:@"WHERE 1=1 " params:@[]];
+     return [DBHelper queryAll:[PoiInfoEntity class] conditions:@"WHERE 1=1 order by distance" params:@[]];
 }
 
 -(NSArray*)queryPoiInfo:(NSString *)charge forType:(NSString *)type
 {
-    NSString *where=@"WHERE 1=1 ";
-    if ([charge isEqualToString:@"2"]) {
+    NSString *where=@"WHERE 1=1  order by distance ";
+    if ([charge isEqualToString:@"0"]) {
         if (![type isEqualToString:@"0"]) {
-            where=[NSString stringWithFormat:@"WHERE typeDes ='%@'",type];
+            where=[NSString stringWithFormat:@"WHERE typeDes ='%@'  order by distance",type];
         }
     }else{
         if (![type isEqualToString:@"0"]) {
-            where=[NSString stringWithFormat:@"WHERE charge='%@' and typeDes='%@'",charge,type];
+            where=[NSString stringWithFormat:@"WHERE charge='%@' and typeDes='%@' order by distance",charge,type];
         }else{
-            where=[NSString stringWithFormat:@"WHERE charge='%@' ",charge];
+            where=[NSString stringWithFormat:@"WHERE charge='%@' order by distance",charge];
         }
     }
-     return [DBHelper queryAll:[PoiInfoEntity class] conditions:where params:@[]];
+    return [DBHelper queryAll:[PoiInfoEntity class] conditions:where params:@[]];
 }
 
 -(BOOL)deleteAllPoiInfo

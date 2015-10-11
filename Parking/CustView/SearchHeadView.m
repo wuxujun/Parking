@@ -243,13 +243,13 @@
     [lineView1 setFrame:CGRectMake(0, 40, contentViewArea.width, 0.5)];
     [lineView2 setFrame:CGRectMake(0, 80, contentViewArea.width, 0.5)];
     
-    [lineView3 setFrame:CGRectMake(15+w, 42, 0.5, 32)];
-    [lineView4 setFrame:CGRectMake(25+w*2, 42, 0.5, 32)];
-    [lineView5 setFrame:CGRectMake(45+w*3, 42, 0.5, 32)];
+    [lineView3 setFrame:CGRectMake(15+w, 44, 0.5, 32)];
+    [lineView4 setFrame:CGRectMake(25+w*2, 44, 0.5, 32)];
+    [lineView5 setFrame:CGRectMake(45+w*3, 44, 0.5, 32)];
     
-    [lineView6 setFrame:CGRectMake(15+w, 84, 0.5, 32)];
-    [lineView7 setFrame:CGRectMake(25+w*2,84, 0.5, 32)];
-    [lineView8 setFrame:CGRectMake(45+w*3, 84, 0.5, 32)];
+    [lineView6 setFrame:CGRectMake(15+w, 86, 0.5, 32)];
+    [lineView7 setFrame:CGRectMake(25+w*2,86, 0.5, 32)];
+    [lineView8 setFrame:CGRectMake(45+w*3, 86, 0.5, 32)];
     
 }
 

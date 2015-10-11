@@ -21,6 +21,11 @@
     if (self) {
         delegate=aDelegate;
         [self initializeFields];
+        
+        UITapGestureRecognizer  *tapRecognizer=[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
+        [tapRecognizer setNumberOfTapsRequired:1];
+        [tapRecognizer setNumberOfTouchesRequired:1];
+        [self addGestureRecognizer:tapRecognizer];
     }
     return self;
 }
@@ -132,6 +137,12 @@
     [self addSubview:contentView];
     [self reAdjustLayout];
 }
+-(void)handleSingleTap:(UITapGestureRecognizer*)recognizer
+{
+    if ([delegate respondsToSelector:@selector(onHomeInfoViewClicked:type:)]) {
+        [delegate onHomeInfoViewClicked:self type:11];
+    }
+}
 
 -(IBAction)onButton:(id)sender
 {
@@ -165,7 +176,7 @@
     [titleLabel setFrame:CGRectMake(10, 5, contentViewArea.width-80, 32)];
     [addressLabel setFrame:CGRectMake(10, 34, contentViewArea.width-100, 26)];
     [numsLabel setFrame:CGRectMake(10, 34, w, 26)];
-    [priceLabel setFrame:CGRectMake(20+w, 34, w, 26)];
+    [priceLabel setFrame:CGRectMake(20+w-30, 34, w+30, 26)];
     [distanceLabel setFrame:CGRectMake(30+w*2, 34, w, 26)];
     [line setFrame:CGRectMake(10, 64, contentViewArea.width-20, 0.4)];
     
@@ -224,12 +235,14 @@
                 [priceLabel setText:[NSString stringWithFormat:@"价格:%@",[infoDict objectForKey:@"chargeDetail"]]];
             }
         }
-        HLog(@"%@    -->%@   =====>   %@  --> %@",[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE],[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE],[infoDict objectForKey:@"latitude"],[infoDict objectForKey:@"longitude"]);
-        MAMapPoint point1 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue],[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]));
-        MAMapPoint point2 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[infoDict objectForKey:@"latitude"] floatValue],[[infoDict objectForKey:@"longitude"] floatValue]));
+//        HLog(@"%@    -->%@   =====>   %@  --> %@",[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE],[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE],[infoDict objectForKey:@"latitude"],[infoDict objectForKey:@"longitude"]);
+//        MAMapPoint point1 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue],[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]));
+//        MAMapPoint point2 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[infoDict objectForKey:@"latitude"] floatValue],[[infoDict objectForKey:@"longitude"] floatValue]));
         //2.计算距离
-        CLLocationDistance distance = MAMetersBetweenMapPoints(point1,point2);
+//        CLLocationDistance distance = MAMetersBetweenMapPoints(point1,point2);
+        NSInteger distance=[[infoDict objectForKey:@"distance"] integerValue];
         [distanceLabel setText:[NSString stringWithFormat:@"距离:%@",[NSString caleDistance:distance]]];
+        
     }
 
 }

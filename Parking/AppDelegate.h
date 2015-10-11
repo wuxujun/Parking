@@ -24,4 +24,7 @@
 
 @property (nonatomic,strong)id<GAITracker>    tracker;
 
+
+-(void)openIntroduction:(NSInteger)type;
+-(void)openHomeView;
 @end

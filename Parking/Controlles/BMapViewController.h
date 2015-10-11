@@ -14,6 +14,8 @@
 #import "iflyMSC/IFlySpeechSynthesizerDelegate.h"
 #import "iflyMSC/IFlyRecognizerView.h"
 #import "iflyMSC/IFlyRecognizerViewDelegate.h"
+#import <CoreLocation/CoreLocation.h>
+#import <CoreLocation/CLLocationManagerDelegate.h>
 
 @interface BMapViewController : UIViewController<MAMapViewDelegate,IFlySpeechSynthesizerDelegate,IFlyRecognizerViewDelegate>
 
@@ -21,6 +23,7 @@
 @property(nonatomic,strong) IFlySpeechSynthesizer   *iFlySpeechSynthesizer;
 @property(nonatomic,strong)NSString*                cityCode;
 @property(nonatomic,strong)HNetworkEngine           *networkEngine;
+@property(nonatomic,strong)MAUserLocation    *userLocationAnnotation;
 
 -(void)startIFlyRecognizer;
 -(void)searchForVoiceKeyword:(NSString*)keyword;

@@ -10,11 +10,13 @@
 #import "MenuHeadView.h"
 #import "UIViewController+REFrostedViewController.h"
 
-@interface MenuViewController ()<MenuHeadViewDelegate>
+@interface MenuViewController ()<MenuHeadViewDelegate,UITableViewDataSource,UITableViewDelegate>
 {
     NSMutableArray      *data;
     
     MenuHeadView        *headView;
+    
+    UITableView         *_tableView;
 }
 
 @end
@@ -29,14 +31,19 @@
     data=[[NSMutableArray alloc]init];
     
     headView=[[MenuHeadView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 140) delegate:self];
-    [self.tableView setTableHeaderView:headView];
-    self.tableView.showsVerticalScrollIndicator=NO;
-    self.tableView.separatorColor = [UIColor grayColor];
-    self.tableView.delegate = self;
-    self.tableView.dataSource = self;
-    self.tableView.opaque = NO;
-    self.tableView.backgroundColor =DEFAULT_NAVIGATION_BACKGROUND_COLOR;
-
+    [self.view addSubview:headView];
+    
+    if (_tableView==nil) {
+        _tableView=[[UITableView alloc]initWithFrame:CGRectMake(0, 140, SCREEN_WIDTH, SCREEN_HEIGHT-140)];
+        _tableView.dataSource=self;
+        _tableView.delegate=self;
+        _tableView.showsVerticalScrollIndicator=NO;
+        _tableView.opaque=NO;
+        _tableView.separatorStyle=UITableViewCellSeparatorStyleNone;
+        _tableView.backgroundColor=[UIColor whiteColor];
+        [self.view addSubview:_tableView];
+    }
+    
     [self loadData];
 }
 
@@ -49,13 +56,14 @@
 
 -(void)loadData
 {
+    [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"高级搜索",@"title",@"0",@"type",@"ic_menu_search",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"交通公告",@"title",@"1",@"type",@"ic_menu_notice",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"预定车位",@"title",@"2",@"type",@"ic_menu_yd",@"image", nil]];
-    [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"反向寻车",@"title",@"3",@"type",@"ic_menu_query",@"image", nil]];
+    [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"车位记录",@"title",@"3",@"type",@"ic_menu_query",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"设置",@"title",@"4",@"type",@"ic_menu_set",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"操作指南",@"title",@"5",@"type",@"ic_menu_guide",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"推荐给好友",@"title",@"6",@"type",@"ic_menu_share",@"image", nil]];
-    [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"有奖反馈",@"title",@"7",@"type",@"ic_menu_feedback",@"image", nil]];
+    [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"反馈有奖",@"title",@"7",@"type",@"ic_menu_feedback",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"关于我们",@"title",@"8",@"type",@"ic_menu_about",@"image", nil]];
 }
 
@@ -90,6 +98,9 @@
     [cell.textLabel setText:[dic objectForKey:@"title"]];
     [cell.imageView setImage:[UIImage imageNamed:[dic objectForKey:@"image"]]];
 
+    UIImageView* line=[[UIImageView alloc] initWithFrame:CGRectMake(55, 53, SCREEN_WIDTH-55, 0.5)];
+    [line setBackgroundColor:DEFAULT_LINE_COLOR];
+    [cell addSubview:line];
     cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
     
     return cell;

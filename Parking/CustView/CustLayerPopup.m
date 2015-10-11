@@ -12,7 +12,7 @@
 
 #define RGBA(a, b, c, d) [UIColor colorWithRed:(a / 255.0f) green:(b / 255.0f) blue:(c / 255.0f) alpha:d]
 
-#define MENU_ITEM_HEIGHT        44
+#define MENU_ITEM_HEIGHT        64
 #define FONT_SIZE               15
 #define CELL_IDENTIGIER         @"MenuPopoverCell"
 #define MENU_TABLE_VIEW_FRAME   CGRectMake(0, 0, frame.size.width, frame.size.height)
@@ -32,9 +32,8 @@
 
 @interface CustLayerPopup()
 {
-    UIButton            *parkingBtn;
-    UIButton            *bicycleBtn;
-    UIButton            *busBtn;
+    NSMutableArray      *data;
+    UITableView         *mTableView;
 }
 @property(nonatomic,strong)UIButton     *containerButton;
 
@@ -49,6 +48,7 @@
     if (self) {
         // Initialization code
         delegate=aDelegate;
+        data=[[NSMutableArray alloc]init];
         
         self.containerButton = [[UIButton alloc] init];
         [self.containerButton setBackgroundColor:CONTAINER_BG_COLOR];
@@ -61,54 +61,155 @@
 //        menuPointerView.tag = MENU_POINTER_TAG;
 //        [self.containerButton addSubview:menuPointerView];
         
+        [self loadData];
         // Adding menu Items table
-        UITableView *menuItemsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        mTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
     
-        menuItemsTableView.dataSource = self;
-        menuItemsTableView.delegate = self;
-        menuItemsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        menuItemsTableView.scrollEnabled = NO;
-        menuItemsTableView.backgroundColor = DEFAULT_VIEW_BACKGROUND_COLOR;
-        menuItemsTableView.tag = MENU_TABLE_VIEW_TAG;
+        mTableView.dataSource = self;
+        mTableView.delegate = self;
+        mTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        mTableView.scrollEnabled = NO;
+        mTableView.backgroundColor = DEFAULT_VIEW_BACKGROUND_COLOR;
+        mTableView.tag = MENU_TABLE_VIEW_TAG;
         
 //        UIImageView *bgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Menu_PopOver_BG"]];
 //        menuItemsTableView.backgroundView = bgView;
         
-        [self addSubview:menuItemsTableView];
+        [self addSubview:mTableView];
         
         [self.containerButton addSubview:self];
     }
     return self;
 }
 
+-(void)loadData
+{
+    NSString* fileName=@"setting_layer";
+
+    NSData *jsdata = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:fileName ofType:@"json"]];
+    @autoreleasepool {
+        if (jsdata)
+        {
+            NSArray *dicArray = [NSJSONSerialization JSONObjectWithData:jsdata options:NSJSONReadingAllowFragments error:nil];
+            for (NSDictionary *dic in dicArray)
+            {
+                [data addObject:dic];
+            }
+        }
+    }
+    
+}
 
 -(IBAction)onButton:(id)sender
 {
     UIButton* btn=(UIButton*)sender;
     switch (btn.tag) {
         case 1:{
-            [UserDefaultHelper setObject:[NSNumber numberWithInt:1] forKey:CONF_CURRENT_LAYER_TYPE];
-            [bicycleBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
-            [busBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
+            [UserDefaultHelper setObject:@"1" forKey:CONF_CURRENT_LAYER_TYPE];
             break;
         }
         case 2:{
-            [UserDefaultHelper setObject:[NSNumber numberWithInt:2] forKey:CONF_CURRENT_LAYER_TYPE];
-            [busBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
-            [parkingBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
+            [UserDefaultHelper setObject:@"2" forKey:CONF_CURRENT_LAYER_TYPE];
             break;
         }
         case 3:{
             
-            [UserDefaultHelper setObject:[NSNumber numberWithInt:3] forKey:CONF_CURRENT_LAYER_TYPE];
-            [bicycleBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
-            [parkingBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
+            [UserDefaultHelper setObject:@"3" forKey:CONF_CURRENT_LAYER_TYPE];
             break;
         }
     }
-    [btn setImage:[UIImage imageNamed:@"image_select_yes"] forState:UIControlStateNormal];
     if ([delegate respondsToSelector:@selector(viewSwitch:forIndex:)]) {
         [delegate viewSwitch:self forIndex:btn.tag];
+    }
+}
+
+-(IBAction)onTypeButton:(id)sender
+{
+    UIButton* btn=(UIButton*)sender;
+    switch (btn.tag) {
+        case 2:
+        {
+            [UserDefaultHelper setObject:@"道路停车场" forKey:CONF_PARKING_MAP_TYPE];
+        }
+            break;
+        case 3:
+        {
+            [UserDefaultHelper setObject:@"地面停车场" forKey:CONF_PARKING_MAP_TYPE];
+        }
+            break;
+        case 4:
+        {
+            [UserDefaultHelper setObject:@"地下停车场" forKey:CONF_PARKING_MAP_TYPE];
+            
+        }
+            break;
+        default:
+        {
+            [UserDefaultHelper setObject:@"0" forKey:CONF_PARKING_MAP_TYPE];
+        }
+            break;
+    }
+    [mTableView reloadData];
+    if ([delegate respondsToSelector:@selector(viewTypeSwitch:forIndex:)]) {
+        [delegate viewTypeSwitch:self forIndex:btn.tag];
+    }
+}
+
+-(IBAction)onStatusButton:(id)sender
+{
+    UIButton* btn=(UIButton*)sender;
+    switch (btn.tag) {
+        case 2:
+        {
+            [UserDefaultHelper setObject:@"充足" forKey:CONF_PARKING_MAP_STATUS];
+        }
+            break;
+        case 3:
+        {
+             [UserDefaultHelper setObject:@"较少" forKey:CONF_PARKING_MAP_STATUS];
+        }
+            break;
+        case 4:
+        {
+             [UserDefaultHelper setObject:@"紧缺" forKey:CONF_PARKING_MAP_STATUS];
+            
+        }
+            break;
+        default:
+        {
+             [UserDefaultHelper setObject:@"0" forKey:CONF_PARKING_MAP_STATUS];
+        }
+            break;
+    }
+    [mTableView reloadData];
+    if ([delegate respondsToSelector:@selector(viewStatusSwitch:forIndex:)]) {
+        [delegate viewStatusSwitch:self forIndex:btn.tag];
+    }
+}
+
+-(IBAction)onChargeButton:(id)sender
+{
+    UIButton* btn=(UIButton*)sender;
+    switch (btn.tag) {
+        case 2:
+        {
+             [UserDefaultHelper setObject:@"收费" forKey:CONF_PARKING_MAP_CHARGE];
+        }
+            break;
+        case 3:
+        {
+             [UserDefaultHelper setObject:@"免费" forKey:CONF_PARKING_MAP_CHARGE];
+        }
+            break;
+        default:
+        {
+             [UserDefaultHelper setObject:@"0" forKey:CONF_PARKING_MAP_CHARGE];
+        }
+            break;
+    }
+    [mTableView reloadData];
+    if ([delegate respondsToSelector:@selector(viewChargeSwitch:forIndex:)]) {
+        [delegate viewChargeSwitch:self forIndex:btn.tag];
     }
 }
 
@@ -117,7 +218,7 @@
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 2;
+    return 1;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -127,12 +228,7 @@
 
 - (NSInteger)tableView:(UITableView *)table numberOfRowsInSection:(NSInteger)section
 {
-    switch (section) {
-        case 0:
-            return 1;
-        default:
-            return 2;
-    }
+   return 4;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -145,80 +241,111 @@
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
     }
-    if (indexPath.section==0) {
-        int layerType=[[UserDefaultHelper objectForKey:CONF_CURRENT_LAYER_TYPE] intValue];
-        
-        float width=self.frame.size.width/3.0;
-        parkingBtn=[[UIButton alloc]initWithFrame:CGRectMake(10, 5, 32, 32)];
-        [parkingBtn setTag:1];
-        if (layerType==1) {
-            [parkingBtn setImage:[UIImage imageNamed:@"image_select_yes"] forState:UIControlStateNormal];
-        }else{
-            [parkingBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
-        }
-        [parkingBtn addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-        [cell addSubview:parkingBtn];
-        
-        UILabel* pLabel=[[UILabel alloc]initWithFrame:CGRectMake(40, 5, width-40, 30)];
-        [pLabel setText:@"停车场"];
-        [pLabel setFont:[UIFont systemFontOfSize:14.0]];
-        [cell addSubview:pLabel];
-        
-        bicycleBtn=[[UIButton alloc]initWithFrame:CGRectMake(width, 5, 32, 32)];
-        [bicycleBtn setTag:2];
-        if (layerType==2) {
-            [bicycleBtn setImage:[UIImage imageNamed:@"image_select_yes"] forState:UIControlStateNormal];
-        }else{
-            [bicycleBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
-        }
-        [bicycleBtn addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-        [cell addSubview:bicycleBtn];
-        UILabel* bLabel=[[UILabel alloc]initWithFrame:CGRectMake(30+width, 5, width-30, 30)];
-        [bLabel setText:@"公共自行车"];
-        [bLabel setFont:[UIFont systemFontOfSize:14.0]];
-        [cell addSubview:bLabel];
-        
-        busBtn=[[UIButton alloc]initWithFrame:CGRectMake(10+width*2, 5, 32, 32)];
-        [busBtn setTag:3];
-        if (layerType==3) {
-            [busBtn setImage:[UIImage imageNamed:@"image_select_yes"] forState:UIControlStateNormal];
-        }else{
-            [busBtn setImage:[UIImage imageNamed:@"image_select_no"] forState:UIControlStateNormal];
-        }
-        [busBtn addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-        [cell addSubview:busBtn];
-        
-        
-        UILabel* biLabel=[[UILabel alloc]initWithFrame:CGRectMake(40+width*2, 5, width-40, 30)];
-        [biLabel setText:@"公交站"];
-        [biLabel setFont:[UIFont systemFontOfSize:14.0]];
+    NSDictionary* dict=[data objectAtIndex:indexPath.row];
+    
+    if(indexPath.row==1||indexPath.row==2){
+        UILabel* biLabel=[[UILabel alloc]initWithFrame:CGRectMake(20, 0, SCREEN_WIDTH-40, 26)];
+        [biLabel setText:[dict objectForKey:@"title"]];
+        [biLabel setFont:[UIFont boldSystemFontOfSize:FONT_SIZE]];
         [cell addSubview:biLabel];
         
-        [self addSeparatorImageToCell:cell];
+        id ds=[dict objectForKey:@"datas"];
+        if ([ds isKindOfClass:[NSArray class]]) {
+        float w=(SCREEN_WIDTH-50)/4.0;
+        for (int i=0; i<[ds count]; i++) {
+            NSDictionary * dc=[ds objectAtIndex:i];
+            UIButton* btn=[[UIButton alloc]initWithFrame:CGRectMake(5+w*i+10*i, 26, w, 32)];
+            btn.tag=[[dc objectForKey:@"id"] integerValue];
+            [btn.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
+            [btn setTitleColor:DEFAULT_FONT_COLOR forState:UIControlStateNormal];
+            [btn setTitle:[dc objectForKey:@"title"] forState:UIControlStateNormal];
+            if (indexPath.row==1) {
+                [btn addTarget:self action:@selector(onTypeButton:) forControlEvents:UIControlEventTouchUpInside];
+            }else{
+                [btn addTarget:self action:@selector(onStatusButton:) forControlEvents:UIControlEventTouchUpInside];
+            }
+            [btn.layer setBorderWidth:0.5];
+            [btn.layer setMasksToBounds:YES];
+            [btn.layer setCornerRadius:4.0f];
+            
+            UIImageView* iv=[[UIImageView alloc]initWithFrame:CGRectMake(w-8, 32-8, 8, 8)];
+            [iv setTag:100];
+            [iv setImage:[UIImage imageNamed:@"default_common_checkbutton_icon_highlighted@3x"]];
+            [btn addSubview:iv];
+            
+            NSString* val=[UserDefaultHelper objectForKey:[dc objectForKey:@"valueKey"]];
+            if ([val isEqualToString:[dc objectForKey:@"value"]]) {
+                [iv setHidden:NO];
+                [btn.layer setBorderColor:[DEFAULT_NAVIGATION_BACKGROUND_COLOR CGColor]];
+            }else{
+                [iv setHidden:YES];
+                [btn.layer setBorderColor:[DEFAULT_LINE_COLOR CGColor]];
+            }
+    
+            [cell addSubview:btn];
+            }
+        }
+        UIImageView *separatorImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 63, self.frame.size.width-20, 0.5)];
+        separatorImageView.backgroundColor=DEFAULT_LINE_COLOR;
+        separatorImageView.opaque = YES;
+        [cell.contentView addSubview:separatorImageView];
     }else{
-        NSInteger numberOfRows = [tableView numberOfRowsInSection:indexPath.section];
-        if( [tableView numberOfRowsInSection:indexPath.section] > ONE && !(indexPath.row == numberOfRows - 1) )
-        {
-            [self addSeparatorImageToCell:cell];
-        }
-        cell.textLabel.text = @"停车场状态";
-        if (indexPath.row==1) {
-            cell.textLabel.text=@"滑动显示停车场";
-        }
-        [cell.textLabel setFont:[UIFont boldSystemFontOfSize:FONT_SIZE]];
-        [cell.textLabel setTextColor:DEFAULT_FONT_COLOR];
-        [cell setSelectionStyle:UITableViewCellSelectionStyleGray];
+        UILabel* biLabel=[[UILabel alloc]initWithFrame:CGRectMake(20, 0, SCREEN_WIDTH-40, 30)];
+        [biLabel setText:[dict objectForKey:@"title"]];
+        [biLabel setFont:[UIFont boldSystemFontOfSize:FONT_SIZE]];
         
-        UISwitch *sw=[[UISwitch alloc]initWithFrame:CGRectMake(self.frame.size.width-80, 5, 100, 32)];
-        [sw setTag:indexPath.row];
-        if (indexPath.row==0) {
-            [sw setOn:[[[NSUserDefaults standardUserDefaults] objectForKey:CONF_PARKING_STATUS] boolValue]];
-        }else{
-            [sw setOn:[[[NSUserDefaults standardUserDefaults] objectForKey:CONF_PARKING_MOVE_SHOW] boolValue]];
+        [cell addSubview:biLabel];
+        id ds=[dict objectForKey:@"datas"];
+        if ([ds isKindOfClass:[NSArray class]]) {
+            float w=(SCREEN_WIDTH-40)/3.0;
+            for (int i=0; i<3; i++) {
+                NSDictionary * dc=[ds objectAtIndex:i];
+                UIButton* btn=[[UIButton alloc]initWithFrame:CGRectMake(5+w*i+10*i, 26, w, 32)];
+                btn.tag=[[dc objectForKey:@"id"] integerValue];
+                [btn.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
+                [btn setTitleColor:DEFAULT_FONT_COLOR forState:UIControlStateNormal];
+                [btn setTitle:[dc objectForKey:@"title"] forState:UIControlStateNormal];
+                if (indexPath.row==0) {
+                    [btn addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
+                }else{
+                    [btn addTarget:self action:@selector(onChargeButton:) forControlEvents:UIControlEventTouchUpInside];
+                }
+                [btn.layer setBorderWidth:0.5];
+                [btn.layer setMasksToBounds:YES];
+                [btn.layer setCornerRadius:4.0f];
+                
+                UIImageView* iv=[[UIImageView alloc]initWithFrame:CGRectMake(w-8, 32-8, 8, 8)];
+                [iv setTag:100];
+                [iv setImage:[UIImage imageNamed:@"default_common_checkbutton_icon_highlighted@3x"]];
+                [btn addSubview:iv];
+                
+                if (indexPath.row==0) {
+                    NSInteger val=[[UserDefaultHelper objectForKey:[dc objectForKey:@"valueKey"]] integerValue];
+                    if (val==[[dc objectForKey:@"value"] integerValue]) {
+                        [iv setHidden:NO];
+                        [btn.layer setBorderColor:[DEFAULT_NAVIGATION_BACKGROUND_COLOR CGColor]];
+                    }else{
+                        [iv setHidden:YES];
+                        [btn.layer setBorderColor:[DEFAULT_LINE_COLOR CGColor]];
+                    }
+                }else{
+                    NSString* val=[UserDefaultHelper objectForKey:[dc objectForKey:@"valueKey"]];
+                    if ([val isEqualToString:[dc objectForKey:@"value"]]) {
+                        [iv setHidden:NO];
+                        [btn.layer setBorderColor:[DEFAULT_NAVIGATION_BACKGROUND_COLOR CGColor]];
+                    }else{
+                        [iv setHidden:YES];
+                        [btn.layer setBorderColor:[DEFAULT_LINE_COLOR CGColor]];
+                    }
+                }
+                
+                [cell addSubview:btn];
+            }
         }
-        [sw addTarget:self action:@selector(switchStatus:) forControlEvents:UIControlEventValueChanged];
-        [cell addSubview:sw];
-        
+        UIImageView *separatorImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 63, self.frame.size.width-20, 0.5)];
+        separatorImageView.backgroundColor=DEFAULT_LINE_COLOR;
+        separatorImageView.opaque = YES;
+        [cell.contentView addSubview:separatorImageView];
     }
     [cell setSelectionStyle:UITableViewCellSelectionStyleNone];
     [cell setBackgroundColor:[UIColor clearColor]];
@@ -236,11 +363,7 @@
 -(IBAction)switchStatus:(id)sender
 {
     UISwitch* sw=(UISwitch*)sender;
-    if (sw.tag==0) {
-        [[NSUserDefaults standardUserDefaults] setBool:sw.isOn forKey:CONF_PARKING_STATUS];
-    }else{
-        [[NSUserDefaults standardUserDefaults] setBool:sw.isOn forKey:CONF_PARKING_MOVE_SHOW];
-    }
+    [[NSUserDefaults standardUserDefaults] setBool:sw.isOn forKey:CONF_PARKING_MOVE_SHOW];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 #pragma mark -
@@ -280,6 +403,7 @@
 
 - (void)addSeparatorImageToCell:(UITableViewCell *)cell
 {
+    HLog(@".....%f",cell.frame.size.height);
     UIImageView *separatorImageView = [[UIImageView alloc] initWithFrame:SEPERATOR_LINE_RECT];
     separatorImageView.backgroundColor=DEFAULT_LINE_COLOR;
     separatorImageView.opaque = YES;

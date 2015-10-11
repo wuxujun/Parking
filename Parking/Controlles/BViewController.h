@@ -28,5 +28,6 @@
 -(void)requestFailed:(NSNotification*)sender;
 
 -(void)alertRequestResult:(NSString*)message;
+-(void)alertRequestResult:(NSString*)message isPop:(BOOL)flag;
 
 @end

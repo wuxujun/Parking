@@ -12,6 +12,7 @@
 #import "CollectViewController.h"
 #import "ForgetPassController.h"
 #import "UIView+LoadingView.h"
+#import "UIButton+Bootstrap.h"
 
 @interface UserViewController()
 
@@ -27,6 +28,29 @@
     [self setCenterTitle:@"用户信息"];
     self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(onRefresh:)];
     _tableView.separatorStyle=UITableViewCellSeparatorStyleSingleLine;
+    [self initFootView];
+}
+
+-(void)initFootView
+{
+    UIView* footView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 54)];
+    
+    UIButton* btn=[[UIButton alloc]initWithFrame:CGRectMake(10, (54-36)/2, SCREEN_WIDTH-20, 36)];
+    [btn setTitle:@"退出登录" forState:UIControlStateNormal];
+    [btn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [btn blueStyle];
+    [btn addTarget:self action:@selector(onLogout:) forControlEvents:UIControlEventTouchUpInside];
+    [footView addSubview:btn];
+    [_tableView setTableFooterView:footView];
+    
+}
+
+-(IBAction)onLogout:(id)sender
+{
+    HCurrentUserContext *userContext = [HCurrentUserContext sharedInstance];
+    [userContext clearUserInfo];
+    [self.navigationController popViewControllerAnimated:YES];
+    
 }
 
 -(IBAction)onRefresh:(id)sender

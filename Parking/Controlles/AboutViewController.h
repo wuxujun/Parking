@@ -6,8 +6,8 @@
 //  Copyright (c) 2015年 ___Hongkui___. All rights reserved.
 //
 
-#import "BViewController.h"
 
-@interface AboutViewController : BViewController
+#import <UIKit/UIKit.h>
+@interface AboutViewController : UIViewController
 
 @end

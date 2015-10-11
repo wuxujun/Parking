@@ -26,6 +26,9 @@
 
 @protocol CustLayerPopupDelegate <NSObject>
 
--(void)viewSwitch:(CustLayerPopup*)view forIndex:(int)idx;
+-(void)viewSwitch:(CustLayerPopup*)view forIndex:(NSInteger)idx;
+-(void)viewChargeSwitch:(CustLayerPopup*)view forIndex:(NSInteger)idx;
+-(void)viewTypeSwitch:(CustLayerPopup*)view forIndex:(NSInteger)idx;
+-(void)viewStatusSwitch:(CustLayerPopup*)view forIndex:(NSInteger)idx;
 
 @end

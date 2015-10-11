@@ -168,7 +168,9 @@
     poiRequest.sortrule=1;
     poiRequest.offset=10;
     poiRequest.keywords=strKey;
-    poiRequest.city=@[self.cityCode];
+    if(self.cityCode){
+        poiRequest.city=@[self.cityCode];
+    }
     poiRequest.requireExtension=YES;
     [self.searchAPI AMapPlaceSearch:poiRequest];
     
@@ -185,7 +187,7 @@
 {
     if (self.dataType==1) {
         if (section==1) {
-            return [_datas count]>0?1:0;
+            return 1;
         }
     }
     return [_datas count];
@@ -207,8 +209,13 @@
     }
     if (self.dataType==1) {
         if (indexPath.section==1) {
+            
             UILabel* lb=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 44)];
-            [lb setText:@"清除历史记录"];
+            if ([_datas count]>0) {
+                [lb setText:@"清除历史记录"];
+            }else{
+                [lb setText:@"您还没有历史记录"];
+            }
             [lb setFont:[UIFont systemFontOfSize:14.0f]];
             [lb setTextColor:DEFAULT_FONT_COLOR];
             [lb setTextAlignment:NSTextAlignmentCenter];
@@ -253,8 +260,10 @@
     [self.searchBar resignFirstResponder];
     if (self.dataType==1) {
         if (indexPath.section==1) {
-            [[DBManager getInstance] deleteSearchHistory];
-            [self initHistoryData];
+            if ([_datas count]>0) {
+                [[DBManager getInstance] deleteSearchHistory];
+                [self initHistoryData];
+            }
         }else{
             SearchHisEntity* entity=[_datas objectAtIndex:indexPath.row];
             if (entity) {
@@ -316,8 +325,8 @@
 {
     NSString* key=searchBar.text;
     self.searchBar.text=key;
-    [self.searchDisplayController setActive:NO animated:NO];
-    self.searchBar.placeholder=key;
+//    [self.searchDisplayController setActive:NO animated:NO];
+//    self.searchBar.placeholder=key;
     [self searchTipsWithKey:key];
 //    [self onSearch];
 }
@@ -325,16 +334,27 @@
 #pragma mark - SearchHeadViewDelegate
 -(void)onSearchHeadViewClicked:(NSString *)keyworkd
 {
-    NSString* type=@"1";
-    if ([keyworkd isEqualToString:@"公交站"]) {
+    NSString* type=@"0";
+    if ([keyworkd isEqualToString:@"停车场"]) {
+        type=@"1";
+    }else if ([keyworkd isEqualToString:@"公交站"]) {
         type=@"3";
     }else if([keyworkd isEqualToString:@"公共自行车"]){
         type=@"2";
     }
     
-    NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:keyworkd,@"title",type,@"dataType", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SEARCH_KEYWORK object:dict];
+    if (self.searchType==2) {
+//        NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:keyworkd,@"title",type,@"dataType", nil];
+        NSMutableDictionary* dict=[[NSMutableDictionary alloc]initWithDictionary:self.startPoint];
+        [dict setObject:type forKey:@"dataType"];
+        [dict setObject:keyworkd forKey:@"keyword"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SEARCH_NEARBY_KEYWORK object:dict];
+    }else{
+        NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:keyworkd,@"title",type,@"dataType", nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SEARCH_KEYWORK object:dict];
+    }
     [self.navigationController popViewControllerAnimated:YES];
+    
 }
 
 

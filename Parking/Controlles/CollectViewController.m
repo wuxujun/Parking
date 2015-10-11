@@ -13,6 +13,8 @@
 #import "CollectEntity.h"
 #import "LineViewController.h"
 #import "NaviViewController.h"
+#import "BListViewController.h"
+#import "DetailViewController.h"
 
 @interface CollectViewController()
 
@@ -113,6 +115,28 @@
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
     return cell;
+}
+
+- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    CollectEntity* entity=[_datas objectAtIndex:indexPath.row];
+    if (entity) {
+        NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@",entity.title],@"title",[NSString stringWithFormat:@"%@",entity.dataId],@"poiId",@"0",@"typeDes",[NSString stringWithFormat:@"%@",entity.address],@"address",@"0",@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",@"0",@"idx",@"0",@"charge",@"0",@"chargeDetail",@"0",@"price",@"0",@"totalCount",@"0",@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",@"0",@"cityCode",@"0",@"adCode",@"0",@"freeStatus", nil];
+        if (entity.dataType==3) {
+            BListViewController* dController=[[BListViewController alloc]init];
+            dController.infoDict=dict;
+            [dController setStartPoint:self.startPoint];
+            [self.navigationController pushViewController:dController animated:YES];
+        }else{
+            DetailViewController* dController=[[DetailViewController alloc]init];
+            dController.dataType=entity.dataType;
+            [dController setStartPoint:self.startPoint];
+            [dController setInfoDict:dict];
+            [self.navigationController pushViewController:dController animated:YES];
+        }
+    }
+    
 }
 
 -(IBAction)onLine:(id)sender

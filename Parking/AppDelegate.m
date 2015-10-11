@@ -8,12 +8,16 @@
 
 #import "AppDelegate.h"
 #import "CustNavigationController.h"
+#import "StartViewController.h"
+#import "IntroductionController.h"
 #import "MenuViewController.h"
 #import "UserDefaultHelper.h"
 #import "HCurrentUserContext.h"
 #import "DBHelper.h"
 #import "DBManager.h"
 #import "SearchHisEntity.h"
+#import "Reachability.h"
+#import "SIAlertView.h"
 
 #import <AMapNaviKit/AMapNaviKit.h>
 #import "iflyMSC/IFlySpeechSynthesizer.h"
@@ -24,11 +28,11 @@
 #import "iflyMSC/IFlyUserWords.h"
 
 #import "MobClick.h"
-#import <UMSocial.h>
-#import <UMSocialSnsService.h>
-#import <UMSocialWechatHandler.h>
-#import <UMSocialQQHandler.h>
-#import <UMSocialSinaHandler.h>
+#import "UMSocial.h"
+#import "UMSocialSnsService.h"
+#import "UMSocialWechatHandler.h"
+#import "UMSocialQQHandler.h"
+#import "UMSocialSinaHandler.h"
 
 #import "GAIFields.h"
 #import "GAITracker.h"
@@ -73,7 +77,7 @@ static NSString *const kAllowTracking=@"allowTracking";
     [self.iflyDataUploader setParameter:@"userword" forKey:@"dtt"];
     IFlyUserWords* iflyUserWords=[[IFlyUserWords alloc]initWithJson:VOICE_KEYWORD];
     [self.iflyDataUploader uploadDataWithCompletionHandler:^(NSString *result, IFlySpeechError *error) {
-        NSLog(@"%@",result);
+//        NSLog(@"%@",result);
         if(![error errorCode]){
             NSLog(@"上传成功");
         }
@@ -92,6 +96,8 @@ static NSString *const kAllowTracking=@"allowTracking";
     
     
     [DBHelper initDatabase];
+    
+    [self checkNetwork];
     
     [self initConfigData];
     
@@ -112,9 +118,12 @@ static NSString *const kAllowTracking=@"allowTracking";
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onOpenController:) name:NOTIFICATION_OPEN_TYPE object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchKeyword:) name:NOTIFICATION_SEARCH_KEYWORK object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchNearbyKeyword:) name:NOTIFICATION_SEARCH_NEARBY_KEYWORK object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchHisKeyword:) name:NOTIFICATION_SEARCH_HIS_KEYWORK object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchTip:) name:NOTIFICATION_SEARCH_TIP object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onMapSelectDone:) name:NOTIFICATION_MAPSELECT_DONE object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
 
     NSDictionary *appDefault=@{kAllowTracking:@(YES)};
     [[NSUserDefaults standardUserDefaults]registerDefaults:appDefault];
@@ -129,6 +138,36 @@ static NSString *const kAllowTracking=@"allowTracking";
     
     self.window=[[UIWindow alloc]initWithFrame:[[UIScreen mainScreen] bounds]];
     self.homeViewController=[[HomeViewController alloc]init];
+   
+    self.rootViewController=[[StartViewController alloc] init];
+    self.window.rootViewController=self.rootViewController;
+    self.window.tintColor=[UIColor whiteColor];
+    [self.window makeKeyAndVisible];
+    
+    return YES;
+}
+
+-(void)openIntroduction:(NSInteger)type
+{
+    for (UIView* view in self.window.subviews) {
+        if ([view isKindOfClass:[UIView  class]]) {
+            [view removeFromSuperview];
+        }
+    }
+    IntroductionController* dController=[[IntroductionController alloc]init];
+    dController.dataType=type;
+    self.rootViewController=dController;
+    self.window.rootViewController=self.rootViewController;
+    [self.window makeKeyAndVisible];
+}
+
+-(void)openHomeView
+{
+    for (UIView* view in self.window.subviews) {
+        if ([view isKindOfClass:[UIView  class]]) {
+            [view removeFromSuperview];
+        }
+    }
     CustNavigationController *naviController=[[CustNavigationController alloc] initWithRootViewController:self.homeViewController];
     MenuViewController* menuController=[[MenuViewController alloc]init];
     REFrostedViewController *frostedViewController=[[REFrostedViewController alloc]initWithContentViewController:naviController  menuViewController:menuController];
@@ -142,11 +181,27 @@ static NSString *const kAllowTracking=@"allowTracking";
     self.window.tintColor=[UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
-    return YES;
+}
+
+-(void)checkNetwork
+{
+//    Reachability * reach=[Reachability reachabilityForInternetConnection];
+    Reachability* reach=[Reachability reachabilityWithHostname:@"www.163.com"];
+    reach.reachableBlock=^(Reachability *reach){
+       
+    };
+    reach.unreachableBlock=^(Reachability *reach){
+        
+    };
+    [reach startNotifier];
 }
 
 -(void)initConfigData
 {
+    if(![UserDefaultHelper objectForKey:PRE_FIRST_OPEN]){
+        [UserDefaultHelper setObject:[NSNumber numberWithBool:true] forKey:PRE_FIRST_OPEN];
+    }
+    
     if (![UserDefaultHelper objectForKey:PRE_VOICE_TYPE]) {
         [UserDefaultHelper setObject:[NSNumber numberWithBool:false] forKey:PRE_VOICE_TYPE];
     }
@@ -160,16 +215,13 @@ static NSString *const kAllowTracking=@"allowTracking";
     }
     
     if(![UserDefaultHelper objectForKey:PRE_MAP_ZOOM]){
-        [UserDefaultHelper setObject:[NSNumber numberWithBool:false] forKey:PRE_MAP_ZOOM];
+        [UserDefaultHelper setObject:[NSNumber numberWithBool:true] forKey:PRE_MAP_ZOOM];
     }
 
     if(![UserDefaultHelper objectForKey:PRE_NAVI_EMULATOR]){
         [UserDefaultHelper setObject:[NSNumber numberWithBool:false] forKey:PRE_NAVI_EMULATOR];
     }
 
-    if(![UserDefaultHelper objectForKey:CONF_PARKING_STATUS]){
-        [UserDefaultHelper setObject:[NSNumber numberWithBool:true] forKey:CONF_PARKING_STATUS];
-    }
     
     if(![UserDefaultHelper objectForKey:CONF_PARKING_MOVE_SHOW]){
         [UserDefaultHelper setObject:[NSNumber numberWithBool:true] forKey:CONF_PARKING_MOVE_SHOW];
@@ -178,8 +230,10 @@ static NSString *const kAllowTracking=@"allowTracking";
     [UserDefaultHelper setObject:@"0" forKey:CONF_MAP_TO_LIST];
     [UserDefaultHelper setObject:@"0" forKey:CONF_LIST_TO_MAP];
     
-    [UserDefaultHelper setObject:@"2" forKey:CONF_PARKING_MAP_CHARGE];
+    [UserDefaultHelper setObject:@"0" forKey:CONF_PARKING_MAP_CHARGE];
+    [UserDefaultHelper setObject:@"0" forKey:CONF_PARKING_MAP_STATUS];
     [UserDefaultHelper setObject:@"0" forKey:CONF_PARKING_MAP_TYPE];
+    [UserDefaultHelper setObject:@"0" forKey:CONF_PARKING_AREA_CODE];
     
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:version forKey:CONF_DATABASE_VERSION];
@@ -188,6 +242,13 @@ static NSString *const kAllowTracking=@"allowTracking";
     [MobClick startWithAppkey:UMENG_APPKEY reportPolicy:BATCH channelId:@""];
     [MobClick setAppVersion:version];
     [UMSocialData setAppKey:UMENG_APPKEY];
+    
+    [UMSocialQQHandler setSupportWebView:YES];
+    [UMSocialQQHandler setQQWithAppId:APPID_QQ appKey:APPKEY_QQ url:APPSHARE_URL];
+    
+    [UMSocialWechatHandler setWXAppId:APPKEY_WEIXIN appSecret:APPSECRET_WEIXIN url:APPSHARE_URL];
+    [UMSocialSinaHandler openSSOWithRedirectURL:@"http://sns.whalecloud.com/sina2/callback"];
+    
     
     self.networkEngine=[[HNetworkEngine alloc]initWithHostName:nil customHeaderFields:nil];
     NSString*   requestUrl=[NSString stringWithFormat:@"%@link",kHttpUrl];
@@ -235,7 +296,9 @@ static NSString *const kAllowTracking=@"allowTracking";
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SEARCH_KEYWORK object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SEARCH_HIS_KEYWORK object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SEARCH_TIP object:nil];
-
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SEARCH_NEARBY_KEYWORK object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_MAPSELECT_DONE object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kReachabilityChangedNotification object:nil];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -244,6 +307,11 @@ static NSString *const kAllowTracking=@"allowTracking";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onOpenController:) name:NOTIFICATION_OPEN_TYPE object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchKeyword:) name:NOTIFICATION_SEARCH_KEYWORK object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchTip:) name:NOTIFICATION_SEARCH_TIP object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchNearbyKeyword:) name:NOTIFICATION_SEARCH_NEARBY_KEYWORK object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchHisKeyword:) name:NOTIFICATION_SEARCH_HIS_KEYWORK object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onMapSelectDone:) name:NOTIFICATION_MAPSELECT_DONE object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
+
     
 }
 
@@ -307,6 +375,14 @@ static NSString *const kAllowTracking=@"allowTracking";
     [self.homeViewController searchHisForKeyword:entity];
 }
 
+-(void)onSearchNearbyKeyword:(NSNotification*)notification
+{
+    NSDictionary* dict=(NSDictionary*)notification.object;
+    
+    HLog(@"%@",dict);
+    [self.homeViewController searchNearbyForKeyword:dict];
+}
+
 -(void)onSearchTip:(NSNotification*)notification
 {
     AMapPOI* poi=(AMapPOI*)notification.object;
@@ -317,6 +393,32 @@ static NSString *const kAllowTracking=@"allowTracking";
     [self.homeViewController searchForAMapPOI:poi];
 }
 
+-(void)onMapSelectDone:(NSNotification*)notification
+{
+    NSDictionary* dict=(NSDictionary*)notification.object;
+    [self.homeViewController onMapSelectDone:dict];
+}
+
+-(void)reachabilityChanged:(NSNotification*)sender
+{
+    Reachability* reach=[sender object];
+    if ([reach isReachable]) {
+        HLog(@"%@",reach.currentReachabilityString);
+    }else{
+        HLog(@"----->%@",reach.currentReachabilityString);
+        SIAlertView *alertView=[[SIAlertView alloc]initWithTitle:nil andMessage:@"网络连接失败,请检查网络设置."];
+        [alertView addButtonWithTitle:@"2秒后自动关闭" type:SIAlertViewButtonTypeCancel handler:^(SIAlertView *alertView){
+            [alertView dismissAnimated:YES];
+        }];
+        [alertView show];
+        
+        double delayInSeconds = 2.0;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            [alertView dismissAnimated:YES];
+        });
+    }
+}
 
 #ifdef __IPHONE_8_0
 -(void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings

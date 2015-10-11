@@ -164,23 +164,23 @@
         if ([self.infoDict objectForKey:@"address"]) {
             [addressLabel setText:[NSString stringWithFormat:@"地址:%@",[self.infoDict objectForKey:@"address"]]];
         }
-        if ([self.infoDict objectForKey:@"price"]) {
-            [priceLabel setText:[NSString stringWithFormat:@"收费信息:%@",[self.infoDict objectForKey:@"price"]]];
+        if ([self.infoDict objectForKey:@"chargeDetail"]) {
+            [priceLabel setText:[NSString stringWithFormat:@"收费信息:%@",[self.infoDict objectForKey:@"chargeDetail"]]];
         }
     }
     int sourceType=[[self.infoDict objectForKey:@"sourceType"] intValue];
-    if (sourceType==1) {
-        MAMapPoint point1 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue],[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]));
-        MAMapPoint point2 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[self.infoDict objectForKey:@"latitude"] floatValue],[[self.infoDict objectForKey:@"longitude"] floatValue]));
-        //2.计算距离
-        CLLocationDistance distance = MAMetersBetweenMapPoints(point1,point2);
-        [distanceLabel setText:[NSString stringWithFormat:@"距离:%@",[NSString caleDistance:distance]]];
-        
-    }else{
+//    if (sourceType==1) {
+//        MAMapPoint point1 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue],[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]));
+//        MAMapPoint point2 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[self.infoDict objectForKey:@"latitude"] floatValue],[[self.infoDict objectForKey:@"longitude"] floatValue]));
+//        //2.计算距离
+//        CLLocationDistance distance = MAMetersBetweenMapPoints(point1,point2);
+//        [distanceLabel setText:[NSString stringWithFormat:@"距离:%@",[NSString caleDistance:distance]]];
+//        
+//    }else{
         if ([self.infoDict objectForKey:@"distance"]) {
             [distanceLabel setText:[NSString stringWithFormat:@"距离:%@",[NSString caleDistance:[[self.infoDict objectForKey:@"distance"]integerValue]]]];
         }
-    }
+//    }
     if(sourceType==1&&dType==2){
         [priceLabel setHidden:YES];
     }

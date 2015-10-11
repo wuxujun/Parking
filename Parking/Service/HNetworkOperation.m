@@ -26,9 +26,10 @@
     if ([currentUser hadLogin]) {
         params[APP_REQUEST_USER_IDENTITY] = currentUser.uid;
         params[@"username"] = [currentUser.username stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    }else{
-        params[APP_REQUEST_USER_IDENTITY] = @(0);
     }
+//    else{
+//        params[APP_REQUEST_USER_IDENTITY] = @(0);
+//    }
     
     
     
@@ -43,7 +44,7 @@
     NSError* error;
     NSData* jsonData=[NSJSONSerialization dataWithJSONObject:params options:0 error:&error];
     NSString* str=[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    jsonParams[@"content"]=str;
+//    jsonParams[@"content"]=str;
 #endif
     NSDateFormatter *dateFormatter=[[NSDateFormatter alloc]init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];

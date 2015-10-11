@@ -29,7 +29,7 @@
 -(void)initializeFields
 {
     contentView=[[UIView alloc]init];
-    [contentView setBackgroundColor:[UIColor clearColor]];
+    [contentView setBackgroundColor:DEFAULT_NAVIGATION_BACKGROUND_COLOR];
     [contentView setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
     
     
@@ -131,6 +131,8 @@
     HCurrentUserContext* userContext=[HCurrentUserContext sharedInstance];
     if (userContext.uid) {
         [nickLabel setText:userContext.username];
+    }else{
+        [nickLabel setText:@"未登录"];
     }
 }
 

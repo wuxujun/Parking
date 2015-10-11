@@ -22,6 +22,9 @@
 -(void)showInView:(UIView*)view;
 -(void)dismissPopover;
 
+-(void)setMapPoint:(NSDictionary*)dict;
+-(void)setPhotoInfo:(NSDictionary*)dict;
+
 - (void)layoutUIForInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
 
 @end
@@ -29,6 +32,7 @@
 
 @protocol SubmitLayerPopupDelegate <NSObject>
 
--(void)onSubmitContent:(SubmitLayerPopup*)view;
+-(void)onSubmitContent:(SubmitLayerPopup*)view forIndex:(NSInteger)tag;
+-(void)showSubmitMessage:(NSString*)msg;
 
 @end

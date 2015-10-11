@@ -15,7 +15,7 @@
 
 @property(nonatomic,strong)AMapSearchAPI *searchAPI;
 
-@property(nonatomic,assign)NSInteger    searchType;
+@property(nonatomic,assign)NSInteger    searchType;  //1 关键字  2 附近
 @property(nonatomic,strong)NSString*    searchKeyword;
 
 @property(nonatomic,strong)NSDictionary* startPoint;

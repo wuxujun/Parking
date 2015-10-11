@@ -178,11 +178,11 @@
 -(void)mapView:(MAMapView *)mapView didUpdateUserLocation:(MAUserLocation *)userLocation updatingLocation:(BOOL)updatingLocation
 {
     if (updatingLocation&&self.userLocationAnnotationView!=nil) {
-        [UIView animateWithDuration:0.1 animations:^{
-            double degree=userLocation.heading.trueHeading-self.mapView.rotationDegree;
-            self.userLocationAnnotationView.transform=CGAffineTransformMakeRotation(degree*M_PI/180.0f);
-            
-        }];
+//        [UIView animateWithDuration:0.1 animations:^{
+//            double degree=userLocation.heading.trueHeading-self.mapView.rotationDegree;
+//            self.userLocationAnnotationView.transform=CGAffineTransformMakeRotation(degree*M_PI/180.0f);
+//            
+//        }];
     }
 }
 

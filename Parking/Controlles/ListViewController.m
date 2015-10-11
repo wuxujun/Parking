@@ -36,13 +36,13 @@
 {
     [super viewDidLoad];
     self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"default_common_map_icon_normal"] style:UIBarButtonItemStylePlain target:self action:@selector(showMap:)];
-    currentCharge=@"2";
+    currentCharge=@"0";
     currentType=@"0";
     
-    if (self.sourceType==1&&self.dataType==1) {
-        _tableView.frame=CGRectMake(0, 44, self.view.frame.size.width, self.view.frame.size.height-44);
-        [self initHeadView];
-    }
+//    if (self.sourceType==1&&self.dataType==1) {
+//        _tableView.frame=CGRectMake(0, 44, self.view.frame.size.width, self.view.frame.size.height-44);
+//        [self initHeadView];
+//    }
     _tableView.separatorStyle=UITableViewCellSeparatorStyleSingleLine;
 }
 
@@ -222,7 +222,7 @@
     if (entity) {
         ListViewCell* item=[[ListViewCell alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 100) delegate:self];
         item.dataType=self.dataType;
-        item.infoDict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%d",entity.distance],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",[NSString stringWithFormat:@"%d",entity.idx],@"idx",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode", nil];
+        item.infoDict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%d",entity.distance],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",[NSString stringWithFormat:@"%d",entity.idx],@"idx",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode",entity.freeStatus,@"freeStatus", nil];
         [cell addSubview:item];
     }
     cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;

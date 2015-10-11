@@ -205,7 +205,7 @@
             [self.userField setKeyboardType:UIKeyboardTypePhonePad];
             [self.userField setClearButtonMode:UITextFieldViewModeWhileEditing];
             [self.userField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
-            [self.userField setValue:DEFAULT_FONT_COLOR forKeyPath:@"_placeholderLabel.textColor"];
+            [self.userField setValue:DEFAULT_LINE_COLOR forKeyPath:@"_placeholderLabel.textColor"];
             if (IOS_VERSION_7_OR_ABOVE) {
                 [self.userField setTintColor:DEFAULT_FONT_COLOR];
             }
@@ -249,7 +249,7 @@
             [self.passField setReturnKeyType:UIReturnKeyNext];
             [self.passField setClearButtonMode:UITextFieldViewModeWhileEditing];
             [self.passField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
-            [self.passField setValue:DEFAULT_FONT_COLOR forKeyPath:@"_placeholderLabel.textColor"];
+            [self.passField setValue:DEFAULT_LINE_COLOR forKeyPath:@"_placeholderLabel.textColor"];
             [self.passField.layer setMasksToBounds:YES];
             [self.passField.layer setCornerRadius:5.0f];
             [self.passField.layer setBorderColor:[DEFAULT_LINE_COLOR CGColor]];
@@ -308,7 +308,7 @@
             [self.smsField setKeyboardType:UIKeyboardTypeDecimalPad];
             [self.smsField setClearButtonMode:UITextFieldViewModeWhileEditing];
             [self.smsField setContentVerticalAlignment:UIControlContentVerticalAlignmentCenter];
-            [self.smsField setValue:DEFAULT_FONT_COLOR forKeyPath:@"_placeholderLabel.textColor"];
+            [self.smsField setValue:DEFAULT_LINE_COLOR forKeyPath:@"_placeholderLabel.textColor"];
             if (IOS_VERSION_7_OR_ABOVE) {
                 [self.smsField setTintColor:DEFAULT_FONT_COLOR];
             }

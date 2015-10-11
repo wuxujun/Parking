@@ -7,7 +7,7 @@
 //
 
 #import "LineViewController.h"
-#import "NaviViewController.h"
+#import "LineMViewController.h"
 #import "UIViewController+NavigationBarButton.h"
 
 @interface LineViewController ()
@@ -30,7 +30,8 @@
     [super viewDidLoad];
     [self setCenterTitle:@"线路详情"];
     
-    self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithTitle:@"导航" style:UIBarButtonItemStylePlain target:self action:@selector(showMap:)];
+    self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"default_common_map_icon_normal"] style:UIBarButtonItemStylePlain target:self action:@selector(showMap:)];
+    
     self.searchAPI=[[AMapSearchAPI alloc]initWithSearchKey:AMAP_KEY Delegate:self];
     _tableView.separatorStyle=UITableViewCellSeparatorStyleSingleLine;
 }
@@ -54,8 +55,8 @@
 
 -(IBAction)showMap:(id)sender
 {
-    NaviViewController* dController=[[NaviViewController alloc]init];
-    dController.naviType=1;
+    LineMViewController* dController=[[LineMViewController alloc]init];
+    [dController setLineType:self.lineType];
     [dController setStartPoint:self.startPoint];
     [dController setEndPoint:self.endPoint];
     [self.navigationController pushViewController:dController animated:YES];

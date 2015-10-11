@@ -13,11 +13,5 @@
                  "id":3,"title":"避免收费","valueKey":"pre_navi_mode_charge"
             }
         ]
-    },
-    {
-        "id":2,
-        "title":"模拟导航",
-        "type":1,
-        "valueKey":"pre_navi_emulator"
     }
 ]

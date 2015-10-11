@@ -12,9 +12,19 @@
 #import "LineViewController.h"
 #import "DBManager.h"
 #import "CollectEntity.h"
+#import "PhotoViewController.h"
 
+#import "DMLazyScrollView.h"
 
-@interface DetailViewController()
+@interface DetailViewController()<DMLazyScrollViewDelegate>
+{
+    UIView          * mHeadView;
+    DMLazyScrollView    *mHeadScrollView;
+    
+    NSMutableArray      *photoDatas;
+    NSMutableArray      *viewControllerArray;
+    int             sourceType;
+}
 @end
 
 @implementation DetailViewController
@@ -23,6 +33,11 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
+    photoDatas=[[NSMutableArray alloc]init];
+    viewControllerArray=[[NSMutableArray alloc] initWithCapacity:10];
+    for (NSUInteger k=0 ; k<10; ++k) {
+        [viewControllerArray addObject:[NSNull null]];
+    }
     
     [self setCenterTitle:@"停车场详情"];
     [self addRightFavoriteButton:NO action:@selector(onCollect:)];
@@ -34,16 +49,48 @@
     [self initHeadView];
     if (self.infoDict) {
         HLog(@"%@",self.infoDict);
-        NSInteger count=[[DBManager getInstance] queryCollectCountWithId:[self.infoDict objectForKey:@"uid"]];
+        sourceType=[[self.infoDict objectForKey:@"sourceType"] intValue];
+        NSInteger count=[[DBManager getInstance] queryCollectCountWithId:[self.infoDict objectForKey:@"poiId"]];
         if (count>0) {
             [self addRightFavoriteButton:YES action:@selector(onCollect:)];
         }
     }
 }
 
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    if ([[self.infoDict objectForKey:@"sourceType"] intValue]==1&&[[self.infoDict objectForKey:@"dataType"] intValue]==1) {
+        [self loadDetail];
+    }else{
+        [photoDatas addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"1",@"dataType", nil]];
+        mHeadScrollView.numberOfPages=1;
+    }
+}
+
 -(void)loadDetail
 {
-    NSString *request=[NSString stringWithFormat:@"%@parking_detail",kHttpUrl];
+    NSString *requestUrl=[NSString stringWithFormat:@"%@parking_detail",kHttpUrl];
+    NSMutableDictionary* params=[[NSMutableDictionary alloc]init];
+    [params setObject:[self.infoDict objectForKey:@"poiId"] forKey:@"parkId"];
+    [self.networkEngine postOperationWithURLString:requestUrl params:params success:^(MKNetworkOperation *completedOperation, id result) {
+        HLog(@"%@",result);
+        if([[result objectForKey:@"status"] intValue]==200){
+            NSArray*    array=[result objectForKey:@"photoLink"];
+            if (array&&[array count]>0) {
+                for (int i=0;i<[array count];i++) {
+                    if (i>0) {
+                        [photoDatas addObject:[array objectAtIndex:i]];
+                    }
+                }
+                mHeadScrollView.numberOfPages=photoDatas.count;
+            }
+            
+        }
+    } error:^(NSError *error) {
+        HLog(@"%@",error);
+    }];
+    
 }
 
 -(IBAction)onCollect:(id)sender
@@ -62,7 +109,7 @@
         [dict setObject:[self.infoDict objectForKey:@"sourceType"] forKey:@"sourceType"];
         [dict setObject:[self.infoDict objectForKey:@"dataType"] forKey:@"dataType"];
         [dict setObject:[NSString stringWithFormat:@"%.0f",[[NSDate date] timeIntervalSince1970]] forKey:@"favTime"];
-        [dict setObject:[self.infoDict objectForKey:@"uid"] forKey:@"dataId"];
+        [dict setObject:[self.infoDict objectForKey:@"poiId"] forKey:@"dataId"];
         
         HLog(@"%@",dict);
         [[DBManager getInstance] insertOrUpdateCollect:dict];
@@ -72,15 +119,18 @@
 
 -(void)initHeadView
 {
-    UIView * bg=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 150)];
+    mHeadView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 180)];
     
+    mHeadScrollView=[[DMLazyScrollView alloc]initWithFrame:mHeadView.frame];
+    [mHeadScrollView setEnableCircularScroll:NO];
+    [mHeadScrollView setAutoPlay:NO];
+    mHeadScrollView.controlDelegate=self;
+    [mHeadView addSubview:mHeadScrollView];
+    mHeadScrollView.numberOfPages=0;
     
-    UIImageView* iv=[[UIImageView alloc] initWithFrame:CGRectMake(10, 10, SCREEN_WIDTH-20, 130)];
-    [iv setImage:[UIImage imageNamed:@"parking"]];
-    [iv setContentMode:UIViewContentModeScaleToFill];
-    [bg addSubview:iv];
+    [mHeadView addSubview:mHeadScrollView];
     
-    [_tableView setTableHeaderView:bg];
+    [_tableView setTableHeaderView:mHeadView];
     
     UIView* footer=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 64)];
     
@@ -122,6 +172,32 @@
     
     [footer addSubview:btnNavi];
     [_tableView setTableFooterView:footer];
+    
+    
+    __weak __typeof(&*self)weakSel=self;
+    mHeadScrollView.dataSource=^(NSUInteger index){
+        return [weakSel controllerAtIndex:index];
+    };
+
+}
+
+-(UIViewController*)controllerAtIndex:(NSInteger)index
+{
+    if (index>photoDatas.count||index<0) {
+        return nil;
+    }
+    
+    id res=[viewControllerArray objectAtIndex:index%10];
+    NSDictionary* dict=[photoDatas objectAtIndex:index];
+    if (res==[NSNull null]) {
+        PhotoViewController* viewController=[[PhotoViewController alloc]init];
+        viewController.infoDict=dict;
+        [viewControllerArray replaceObjectAtIndex:index%10 withObject:viewController];
+        return viewController;
+    }
+    [(PhotoViewController*)res setInfoDict:dict];
+    [(PhotoViewController*)res refresh];
+    return res;
 }
 
 -(IBAction)onButton:(id)sender
@@ -182,12 +258,18 @@
             if ([self.infoDict objectForKey:@"title"]) {
                 
                 cell.textLabel.text=[self.infoDict objectForKey:@"title"];
+                if(sourceType==1&&self.dataType==2) {
+                    cell.textLabel.text=[NSString stringWithFormat:@"[%@]%@",[self.infoDict objectForKey:@"poiId"],[self.infoDict objectForKey:@"title"]];
+                }
                 cell.textLabel.font=[UIFont boldSystemFontOfSize:18.0f];
             }
             break;
         }
         case 2:{
             title=@"位置:";
+            if (sourceType==1&&self.dataType==2) {
+                title=@"地址:";
+            }
             content=[self.infoDict objectForKey:@"address"];
             break;
         }
@@ -197,6 +279,16 @@
             if ([self.infoDict objectForKey:@"chargeDetail"]) {
                 content=[self.infoDict objectForKey:@"chargeDetail"];
             }
+            if (sourceType==1&&self.dataType==2) {
+                title=@"车位:";
+                if ([self.infoDict objectForKey:@"freeCount"]&&[self.infoDict objectForKey:@"totalCount"]) {
+                    content=[NSString stringWithFormat:@"%@/%@",[self.infoDict objectForKey:@"freeCount"],[self.infoDict objectForKey:@"totalCount"]];
+                }
+            }
+            if(sourceType==0&&self.dataType==2){
+                title=@"";
+            }
+            
             break;
         }
         default:
