@@ -8,6 +8,7 @@
 
 #import "BViewController.h"
 #import "SIAlertView.h"
+#import "UIViewController+NavigationBarButton.h"
 
 @interface BViewController ()<UITableViewDataSource,UITableViewDelegate,MBProgressHUDDelegate>
 
@@ -23,10 +24,8 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     _datas=[[NSMutableArray alloc]init];
+    [self addBackBarButton];
     
-    UIBarButtonItem* backBtn=[[UIBarButtonItem alloc]init];
-    backBtn.title=@"返回";
-    self.navigationItem.backBarButtonItem=backBtn;
     if (self.infoDict) {
         self.navigationItem.title=[self.infoDict objectForKey:@"title"];
     }

@@ -21,7 +21,7 @@
 
 -(void)showInView:(UIView*)view;
 -(void)dismissPopover;
-
+-(void)setParkingType:(NSInteger)type;
 -(void)setMapPoint:(NSDictionary*)dict;
 -(void)setPhotoInfo:(NSDictionary*)dict;
 

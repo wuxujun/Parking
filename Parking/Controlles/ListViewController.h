@@ -11,7 +11,7 @@
 @interface ListViewController : BViewController
 
 @property(nonatomic,assign)NSInteger        sourceType;
-@property(nonatomic,assign)NSInteger              dataType;
+@property(nonatomic,assign)NSInteger        dataType;
 @property(nonatomic,strong)NSDictionary*    startPoint;
 
 @end

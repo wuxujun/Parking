@@ -7,6 +7,7 @@
 //
 
 #import "SearchViewController.h"
+#import "UIViewController+NavigationBarButton.h"
 #import "SearchHeadView.h"
 #import "SearchMapViewController.h"
 #import "DBManager.h"
@@ -33,7 +34,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
+
     self.searchBar=[[UISearchBar alloc]init];
     [self.searchBar setTintColor:[UIColor blackColor]];
     [self.searchBar setAutocorrectionType:UITextAutocorrectionTypeNo];

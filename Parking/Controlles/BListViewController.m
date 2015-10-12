@@ -27,7 +27,6 @@
 @end
 
 @implementation BListViewController
-
 @synthesize startPoint;
 
 -(void)viewDidLoad
@@ -47,7 +46,7 @@
         for (int i=0; i<[array count]; i++) {
             AMapBusLineSearchRequest* lineRequest=[[AMapBusLineSearchRequest alloc]init];
             lineRequest.keywords=[array objectAtIndex:i];
-            lineRequest.city=@[@"0571"];
+            lineRequest.city=@[self.cityCode];
             lineRequest.requireExtension=YES;
             [self.searchAPI AMapBusLineSearch:lineRequest];
         }

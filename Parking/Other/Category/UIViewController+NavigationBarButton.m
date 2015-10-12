@@ -42,9 +42,9 @@
     button.frame = CGRectMake(10, 0, 44.0f, 44.0f);
     button.titleLabel.textColor=[UIColor whiteColor];
     button.titleLabel.font=[UIFont systemFontOfSize:16.0f];
-    [button setTitle:@"返回" forState:UIControlStateNormal];
-    [button setTitleColor:RGBCOLOR(60, 193, 102) forState:UIControlStateHighlighted];
-    [button setImage:[UIImage imageNamed:@"icon_navi_back_bl"] forState:UIControlStateNormal];
+//    [button setTitle:@"返回" forState:UIControlStateNormal];
+//    [button setTitleColor:RGBCOLOR(60, 193, 102) forState:UIControlStateHighlighted];
+    [button setImage:[UIImage imageNamed:@"default_common_navibar_prev_normal"] forState:UIControlStateNormal];
 //    [button setImage:[UIImage imageNamed:@"icon_navi_back_bl"] forState:UIControlStateHighlighted];
 //    [button setImage:[UIImage imageNamed:@"icon_back_selected"] forState:UIControlStateSelected];
     [button addTarget:self action:@selector(gotoBack) forControlEvents:UIControlEventTouchUpInside];

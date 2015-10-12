@@ -49,6 +49,7 @@
     
     if (self.dataType==1) {
         [self setCenterTitle:@"操作指南"];
+        [self addBackBarButton];
 //        UIButton * back=[[UIButton alloc] initWithFrame:CGRectMake(0, 20, 100, 60)];
 //        [back setTitle:@"返回" forState:UIControlStateNormal];
 //        [back.titleLabel setTextAlignment:NSTextAlignmentCenter];

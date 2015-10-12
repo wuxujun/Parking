@@ -31,13 +31,12 @@
     _tableView.separatorStyle=UITableViewCellSeparatorStyleSingleLine;
 
     self.startPoint=[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%.6f",[[UserDefaultHelper objectForKey:CONF_LOCATION_LATITUDE] doubleValue]],@"latitude",[NSString stringWithFormat:@"%.6f",[[UserDefaultHelper objectForKey:CONF_LOCATION_LONGITUDE] doubleValue]],@"longitude", nil];
-    [self loadData];
 }
 
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
+    [self loadData];
 }
 
 -(void)loadData
@@ -46,9 +45,8 @@
     NSArray* array=[[DBManager getInstance] queryCollect];
     if ([array count]>0) {
         [_datas addObjectsFromArray:array];
-        [_tableView reloadData];
     }
-    
+    [_tableView reloadData];
 }
 
 #pragma mark - UITableViewDataSource

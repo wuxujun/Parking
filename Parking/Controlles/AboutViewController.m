@@ -23,6 +23,7 @@
 {
     [super viewDidLoad];
     [self setCenterTitle:@"关于我们"];
+    [self addBackBarButton];
     if (mWebView==nil) {
         mWebView=[[UIWebView alloc]initWithFrame:self.view.bounds];
         mWebView.delegate=self;

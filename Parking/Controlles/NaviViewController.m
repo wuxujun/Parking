@@ -7,6 +7,7 @@
 //
 
 #import "NaviViewController.h"
+#import "UIViewController+NavigationBarButton.h"
 
 @interface NaviViewController()<AMapNaviViewControllerDelegate>
 
@@ -22,6 +23,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self addBackBarButton];
     self.view.backgroundColor=[UIColor whiteColor];
     
     [self initNaviViewController];

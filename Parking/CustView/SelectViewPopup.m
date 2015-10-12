@@ -1,19 +1,23 @@
 //
-//  ShareQRCodeView.m
+//  SelectViewPopup.m
 //  Parking
 //
-//  Created by xujunwu on 15/10/11.
+//  Created by xujunwu on 15/10/12.
 //  Copyright © 2015年 ___Hongkui___. All rights reserved.
 //
 
-#import "ShareQRCodeView.h"
+#import "SelectViewPopup.h"
 #import "UserDefaultHelper.h"
-#import <QuartzCore/QuartzCore.h>
 #import "UIButton+Bootstrap.h"
+#import <QuartzCore/QuartzCore.h>
+#import "UIViewController+KeyboardAnimation.h"
+#import "UIView+LoadingView.h"
+#import "AppConfig.h"
+
 
 #define RGBA(a, b, c, d) [UIColor colorWithRed:(a / 255.0f) green:(b / 255.0f) blue:(c / 255.0f) alpha:d]
 
-#define MENU_ITEM_HEIGHT        64
+#define MENU_ITEM_HEIGHT        44
 #define FONT_SIZE               15
 #define CELL_IDENTIGIER         @"MenuPopoverCell"
 #define MENU_TABLE_VIEW_FRAME   CGRectMake(0, 0, frame.size.width, frame.size.height)
@@ -31,16 +35,13 @@
 
 #define LANDSCAPE_WIDTH_PADDING 50
 
-@interface ShareQRCodeView()
-{
-    NSMutableArray      *data;
-    UITableView         *mTableView;
-}
+@interface SelectViewPopup()
+
 @property(nonatomic,strong)UIButton     *containerButton;
 
 @end
 
-@implementation ShareQRCodeView
+@implementation SelectViewPopup
 @synthesize containerButton;
 
 - (id)initWithFrame:(CGRect)frame delegate:(id)aDelegate
@@ -49,8 +50,6 @@
     if (self) {
         // Initialization code
         delegate=aDelegate;
-        data=[[NSMutableArray alloc]init];
-        
         self.containerButton = [[UIButton alloc] init];
         [self.containerButton setBackgroundColor:CONTAINER_BG_COLOR];
         [self.containerButton addTarget:self action:@selector(dismissPopover) forControlEvents:UIControlEventTouchUpInside];
@@ -63,29 +62,36 @@
         //        [self.containerButton addSubview:menuPointerView];
         
         // Adding menu Items table
-        mTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        [self loadData];
         
-        mTableView.dataSource = self;
-        mTableView.delegate = self;
-        mTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        mTableView.scrollEnabled = NO;
-        mTableView.backgroundColor = DEFAULT_VIEW_BACKGROUND_COLOR;
-        mTableView.tag = MENU_TABLE_VIEW_TAG;
+        UITableView *menuItemsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        
+        menuItemsTableView.dataSource = self;
+        menuItemsTableView.delegate = self;
+        menuItemsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        menuItemsTableView.scrollEnabled = NO;
+        menuItemsTableView.backgroundColor = DEFAULT_VIEW_BACKGROUND_COLOR;
+        menuItemsTableView.tag = MENU_TABLE_VIEW_TAG;
         
         //        UIImageView *bgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Menu_PopOver_BG"]];
         //        menuItemsTableView.backgroundView = bgView;
         
-        [self addSubview:mTableView];
+        [self addSubview:menuItemsTableView];
         
         [self.containerButton addSubview:self];
     }
     return self;
 }
 
+-(void)loadData
+{
+}
+
 -(IBAction)onButton:(id)sender
 {
-    if ([delegate respondsToSelector:@selector(onClickShareMore:)]) {
-        [delegate onClickShareMore:self];
+    UIButton* btn=(UIButton*)sender;
+    if ([delegate respondsToSelector:@selector(onSelectContent:forIndex:)]) {
+            [delegate onSelectContent:self forIndex:btn.tag];
     }
 }
 
@@ -94,20 +100,17 @@
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    return 5;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row==0) {
-        return (SCREEN_HEIGHT/2.0-MENU_ITEM_HEIGHT);
-    }
     return MENU_ITEM_HEIGHT;
 }
 
 - (NSInteger)tableView:(UITableView *)table numberOfRowsInSection:(NSInteger)section
 {
-    return 2;
+    return 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -120,29 +123,44 @@
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
     }
-    
-    if(indexPath.row==0){
-        float h=SCREEN_HEIGHT/2.0-10-MENU_ITEM_HEIGHT;
-        
-        UIImageView* imageView=[[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH-h)/2.0, 5, h, h)];
-        [imageView setImage:[UIImage imageNamed:@"qrcode"]];
-        [imageView setContentMode:UIViewContentModeScaleToFill];
-        [cell addSubview:imageView];
-    }else{
-        
-        UIButton* btn=[[UIButton alloc]initWithFrame:CGRectMake(20, 10, SCREEN_WIDTH-40, 44)];
-        [btn.titleLabel setFont:[UIFont systemFontOfSize:16.0f]];
-        [btn setTitleColor:DEFAULT_FONT_COLOR forState:UIControlStateNormal];
-        [btn setTitle:@"更多分享" forState:UIControlStateNormal];
-        [btn addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-                
-        [btn.layer setBorderWidth:0.5];
-        [btn.layer setMasksToBounds:YES];
-        [btn.layer setCornerRadius:4.0f];
-        [btn blueStyle];
-        [cell addSubview:btn];
+    UILabel * lb=[[UILabel alloc]initWithFrame:CGRectMake(10, 7, SCREEN_WIDTH-50, 30)];
+    switch (indexPath.section) {
+        case 0:
+            [lb setText:@"请选择上报类型"];
+            [lb setFont:[UIFont boldSystemFontOfSize:16.0f]];
+            [cell setSelectionStyle:UITableViewCellSelectionStyleNone];
+            break;
+        case 1:
+        {
+            [lb setText:@"地面停车场"];
+            [cell setSelectionStyle:UITableViewCellSelectionStyleDefault];
+            break;
+        }
+        case 2:
+        {
+            [lb setText:@"地下停车场"];
+            [cell setSelectionStyle:UITableViewCellSelectionStyleDefault];
+            break;
+        }
+        case 3:
+        {
+            [lb setText:@"道路停车场"];
+            [cell setSelectionStyle:UITableViewCellSelectionStyleDefault];
+            break;
+        }
+        case 4:
+        {
+            [lb setText:@"其他"];
+            [cell setSelectionStyle:UITableViewCellSelectionStyleDefault];
+            break;
+        }
+        default:
+            break;
     }
-    [cell setSelectionStyle:UITableViewCellSelectionStyleNone];
+    [lb setTextColor:DEFAULT_FONT_COLOR];
+    [lb setTextAlignment:NSTextAlignmentCenter];
+    [cell addSubview:lb];
+    [self addSeparatorImageToCell:cell];
     [cell setBackgroundColor:[UIColor clearColor]];
     return cell;
 }
@@ -152,15 +170,14 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    //    [self hide];
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.section>0) {
+        if ([delegate respondsToSelector:@selector(onSelectContent:forIndex:)]) {
+            [delegate onSelectContent:self forIndex:indexPath.section];
+        }
+    }
 }
 
--(IBAction)switchStatus:(id)sender
-{
-    UISwitch* sw=(UISwitch*)sender;
-    [[NSUserDefaults standardUserDefaults] setBool:sw.isOn forKey:CONF_PARKING_MOVE_SHOW];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-}
 #pragma mark -
 #pragma mark Actions
 
@@ -198,7 +215,6 @@
 
 - (void)addSeparatorImageToCell:(UITableViewCell *)cell
 {
-    HLog(@".....%f",cell.frame.size.height);
     UIImageView *separatorImageView = [[UIImageView alloc] initWithFrame:SEPERATOR_LINE_RECT];
     separatorImageView.backgroundColor=DEFAULT_LINE_COLOR;
     separatorImageView.opaque = YES;
@@ -229,4 +245,14 @@
     }
 }
 
+
+-(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    if ([string isEqualToString:@"\n"]) {
+        [textField resignFirstResponder];
+        return NO;
+    }
+    return YES;
+    
+}
 @end

@@ -42,6 +42,7 @@
 #import "CustLayerPopup.h"
 #import "SubmitLayerPopup.h"
 #import "ShareQRCodeView.h"
+#import "SelectViewPopup.h"
 #import "StringUtil.h"
 #import "BListViewController.h"
 #import "DBHelper.h"
@@ -67,7 +68,7 @@
 #import "MBProgressHUD.h"
 #import "UIView+LoadingView.h"
 
-@interface HomeViewController ()<CLLocationManagerDelegate,DMLazyScrollViewDelegate,HomeInfoViewControllerDelegate,CustLayerPopupDelegate,SubmitLayerPopupDelegate,ShareQRCodeViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate>
+@interface HomeViewController ()<CLLocationManagerDelegate,DMLazyScrollViewDelegate,HomeInfoViewControllerDelegate,CustLayerPopupDelegate,SubmitLayerPopupDelegate,ShareQRCodeViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,SelectViewPopupDelegate>
 {
     CLLocationManager   *locManager;
     MBProgressHUD       *loadingHUD;
@@ -124,6 +125,7 @@
 @property(nonatomic,strong)CustLayerPopup*  layerPopup;
 @property(nonatomic,strong)SubmitLayerPopup* submitPopup;
 @property(nonatomic,strong)ShareQRCodeView *  sharePopup;
+@property(nonatomic,strong)SelectViewPopup *  selectPopup;
 
 @property (nonatomic,strong)MAAnnotationView *userKeyAnnotationView;
 
@@ -410,7 +412,7 @@
     btnSubmit=[[UIButton alloc]  initWithFrame:CGRectMake(leftPadding, 190, 38, 38)];
     [btnSubmit setBackgroundImage:[UIImage imageNamed:@"default_main_gpsbutton_background_normal"] forState:UIControlStateNormal];
     [btnSubmit setImage:[UIImage imageNamed:@"default_feedback_icon_map_mergeentrance"] forState:UIControlStateNormal];
-    [btnSubmit addTarget:self action:@selector(onSubmit:) forControlEvents:UIControlEventTouchUpInside];
+    [btnSubmit addTarget:self action:@selector(onSelectType:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:btnSubmit];
     
     btnClear=[[UIButton alloc]  initWithFrame:CGRectMake(leftPadding, 230, 38, 38)];
@@ -448,6 +450,7 @@
     [self.submitPopup.layer setBorderWidth:0.3f];
     [self.submitPopup.layer setBorderColor:[[UIColor grayColor] CGColor]];
     [self.submitPopup showInView:self.view];
+    
 //    self.bottomSpace=[NSLayoutConstraint constraintWithItem:self.submitPopup attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1 constant:-20];
 //    [self.view addConstraint:self.bottomSpace];
     
@@ -466,6 +469,14 @@
 }
 
 
+-(IBAction)onSelectType:(id)sender
+{
+    [self.selectPopup dismissPopover];
+    self.selectPopup=[[SelectViewPopup alloc]initWithFrame:CGRectMake(0, SCREEN_HEIGHT-220.0, SCREEN_WIDTH, 220.0) delegate:self];
+    [self.selectPopup.layer setBorderWidth:0.3f];
+    [self.selectPopup.layer setBorderColor:[[UIColor grayColor] CGColor]];
+    [self.selectPopup showInView:self.view];
+}
 
 -(IBAction)onMapZoom:(id)sender
 {
@@ -565,6 +576,7 @@
     [UserDefaultHelper setObject:@"0" forKey:CONF_LIST_TO_MAP];
     [UserDefaultHelper setObject:@"1" forKey:CONF_MAP_TO_LIST];
     ListViewController* dController=[[ListViewController alloc]init];
+    dController.cityCode=currentCityCode;
     dController.sourceType=sourceType;
     dController.dataType=[[UserDefaultHelper objectForKey:CONF_CURRENT_LAYER_TYPE] intValue];
     [dController setStartPoint:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%f",currentLatitude],@"latitude",[NSString stringWithFormat:@"%f",currentLongitude],@"longitude", nil]];
@@ -645,8 +657,8 @@
     currentPage=currentPageIndex;
     if (currentPageIndex<[data count]) {
         NSDictionary* dic=[data objectAtIndex:currentPageIndex];
-        HLog(@"--->%d---%d-->%@--->%@",currentPageIndex,[dic objectForKey:@"idx"],[dic objectForKey:@"poiId"],[dic objectForKey:@"title"]);
-        HLog(@"---->%@  ---->%@",[dic objectForKey:@"latitude"],[dic objectForKey:@"longitude"]);
+//        HLog(@"--->%d---%d-->%@--->%@",currentPageIndex,[dic objectForKey:@"idx"],[dic objectForKey:@"poiId"],[dic objectForKey:@"title"]);
+//        HLog(@"---->%@  ---->%@",[dic objectForKey:@"latitude"],[dic objectForKey:@"longitude"]);
         [self selectPOIAnnotationForIndex:currentPageIndex];
         if (currentPageIndex>0) {
             bSearchResult=NO;
@@ -708,6 +720,28 @@
 //        [btnClear setHidden:NO];
 //    }
     
+}
+-(void)onSelectContent:(SelectViewPopup *)view forIndex:(NSInteger)tag
+{
+    [self.selectPopup dismissPopover];
+    [self.submitPopup dismissPopover];
+    self.submitPopup=[[SubmitLayerPopup alloc]initWithFrame:CGRectMake(0, SCREEN_HEIGHT/2.0, SCREEN_WIDTH, SCREEN_HEIGHT/2.0) delegate:self];
+    [self.submitPopup.layer setBorderWidth:0.3f];
+    [self.submitPopup.layer setBorderColor:[[UIColor grayColor] CGColor]];
+    [self.submitPopup showInView:self.view];
+    [self.submitPopup setParkingType:tag-1];
+    [self an_subscribeKeyboardWithAnimations:^(CGRect keyboardRect, NSTimeInterval duration, BOOL isShowing) {
+        if (isShowing) {
+            CGRect frame =self.submitPopup.frame;
+            frame.origin.y=CGRectGetHeight(keyboardRect)-44.0;
+            [self.submitPopup setFrame:frame];
+        } else {
+            CGRect frame =self.submitPopup.frame;
+            frame.origin.y=SCREEN_HEIGHT/2.0;
+            [self.submitPopup setFrame:frame];
+        }
+        [self.view layoutIfNeeded];
+    } completion:nil];
 }
 
 -(void)onSubmitContent:(SubmitLayerPopup *)view forIndex:(NSInteger)tag
@@ -781,6 +815,7 @@
             SearchViewController* dController=[[SearchViewController alloc]init];
             dController.searchType=2;
             dController.startPoint=infoDict;
+            dController.cityCode=currentCityCode;
             [self.navigationController pushViewController:dController animated:YES];
             break;
         }
@@ -790,6 +825,7 @@
             dController.lineType=1;
             [dController setStartPoint:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%f",currentLatitude],@"latitude",[NSString stringWithFormat:@"%f",currentLongitude],@"longitude", nil]];
             [dController setEndPoint:infoDict];
+            [dController setCityCode:currentCityCode];
             [self.navigationController pushViewController:dController animated:YES];
             break;
         }
@@ -809,13 +845,15 @@
                 BListViewController* dController=[[BListViewController alloc]init];
                 dController.infoDict=infoDict;
                 [dController setStartPoint:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%f",currentLatitude],@"latitude",[NSString stringWithFormat:@"%f",currentLongitude],@"longitude", nil]];
+                dController.cityCode=currentCityCode;
                 [self.navigationController pushViewController:dController animated:YES];
             }else{
                 DetailViewController* dController=[[DetailViewController alloc]init];
                 dController.dataType=dataTypeLayer;
                 [dController setStartPoint:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%f",currentLatitude],@"latitude",[NSString stringWithFormat:@"%f",currentLongitude],@"longitude", nil]];
-                HLog(@"%@",infoDict);
+//                HLog(@"%@",infoDict);
                 [dController setInfoDict:infoDict];
+                [dController setCityCode:currentCityCode];
                 [self.navigationController pushViewController:dController animated:YES];
             }
             break;
@@ -839,8 +877,8 @@
                 locationFinished=YES;
                 bFirstOrTarget=YES;
                 [self searchForKeyword:[NSDictionary dictionaryWithObjectsAndKeys:@"停车场",@"title",@"1",@"dataType", nil]];
+                [self searchForGeo];
             }
-            [self searchForGeo];
             [UserDefaultHelper setObject:[NSNumber numberWithDouble:currentLatitude] forKey:CONF_LOCATION_LATITUDE];
             [UserDefaultHelper setObject:[NSNumber numberWithDouble:currentLongitude] forKey:CONF_LOCATION_LONGITUDE];
             if (!TARGET_IPHONE_SIMULATOR) {
@@ -866,7 +904,7 @@
 //        [self selectPOIAnnotationForIndex:poi.index];
         
         NSDictionary* dict=poi.dict;
-        HLog(@"%d  %@  %@",[dict objectForKey:@"idx"],[dict objectForKey:@"poiId"],[dict objectForKey:@"title"],[dict objectForKey:@"distance"]);
+//        HLog(@"%d  %@  %@",[dict objectForKey:@"idx"],[dict objectForKey:@"poiId"],[dict objectForKey:@"title"],[dict objectForKey:@"distance"]);
         if ([[dict objectForKey:@"dataType"] intValue]==1&&[[dict objectForKey:@"sourceType"] intValue]==1) {
             [self playSpeech:dict];
         }
@@ -940,6 +978,14 @@
             frame.size.width=frame.size.width*1.5;
             frame.size.height=frame.size.height*1.5;
             anView.frame=frame;
+        }else{
+            if ([img isEqualToString:@"ic_parking"]||[img isEqualToString:@"ic_parking_blue"]||[img isEqualToString:@"ic_parking_blue_fee"]) {
+            }else{
+                CGRect frame=anView.frame;
+                frame.size.width=frame.size.width*1.3;
+                frame.size.height=frame.size.height*1.3;
+                anView.frame=frame;
+            }
         }
         anView.centerOffset=CGPointMake(0, -18);
         return anView;
@@ -1300,6 +1346,7 @@
     switch (type) {
         case 0:{
             SearchAViewController* dController=[[SearchAViewController alloc]init];
+            dController.cityCode=currentCityCode;
             [self.navigationController pushViewController:dController animated:YES];
             break;
         }
@@ -1364,6 +1411,7 @@
             HCurrentUserContext *userContext = [HCurrentUserContext sharedInstance];
             if (userContext.uid) {
                 UserViewController* dController=[[UserViewController alloc]init];
+                dController.cityCode=currentCityCode;
                 [self.navigationController pushViewController:dController animated:YES];
             }else{
                 LoginViewController* dController=[[LoginViewController alloc]init];

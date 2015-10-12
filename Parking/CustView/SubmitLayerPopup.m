@@ -49,6 +49,8 @@
     
     BOOL                isMapSel;
     BOOL                isPhotoSel;
+    
+    NSInteger           parkingType;
 }
 @property(nonatomic,strong)UIButton     *containerButton;
 
@@ -90,7 +92,7 @@
         //        menuItemsTableView.backgroundView = bgView;
         
         [self addSubview:menuItemsTableView];
-        
+        parkingType=0;
         isMapSel=NO;
         isPhotoSel=NO;
         [self.containerButton addSubview:self];
@@ -116,6 +118,11 @@
     isPhotoSel=YES;
 }
 
+-(void)setParkingType:(NSInteger)type
+{
+    parkingType=type;
+    
+}
 -(IBAction)onButton:(id)sender
 {
     UIButton* btn=(UIButton*)sender;
@@ -146,7 +153,15 @@
 
 -(void)submit
 {
-    if (!isMapSel&&!isPhotoSel) {
+    NSString *title = [contentField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if (title.length == 0) {
+        if ([delegate respondsToSelector:@selector(showSubmitMessage:)]) {
+            [delegate showSubmitMessage:@"请停车场标题"];
+        }
+        return;
+    }
+    
+    if (!isMapSel) {
         if ([delegate respondsToSelector:@selector(showSubmitMessage:)]) {
             [delegate showSubmitMessage:@"请地图选点或拍照"];
         }
@@ -156,7 +171,7 @@
     [self showHUDLoadingView:YES];
     NSString* requestUrl=[NSString stringWithFormat:@"%@report_parking",kHttpUrl];
     NSMutableDictionary* params=[[NSMutableDictionary alloc]init];
-    [params setObject:@"1" forKey:@"reportType"];
+    [params setObject:[NSString stringWithFormat:@"%d",parkingType] forKey:@"reportType"];
     [params setObject:[NSString stringWithFormat:@"%@",contentField.text] forKey:@"reportName"];
     
     [params setObject:[NSString stringWithFormat:@"%.6f",[[UserDefaultHelper objectForKey:CONF_MAP_SELECT_LAT] floatValue]] forKey:@"reportLongti"];

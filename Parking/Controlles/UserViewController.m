@@ -155,6 +155,7 @@
         [self.navigationController pushViewController:dController animated:YES];
     }else if(indexPath.row==4){
         CollectViewController* dController=[[CollectViewController alloc]init];
+        dController.cityCode=self.cityCode;
         [self.navigationController pushViewController:dController animated:YES];
     }
 }

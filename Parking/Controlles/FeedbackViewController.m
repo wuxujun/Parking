@@ -31,7 +31,7 @@
 -(void)viewDidLoad
 {
     [super viewDidLoad];
-    [self setCenterTitle:@"有奖反馈"];
+    [self setCenterTitle:@"反馈有奖"];
     self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc] initWithTitle:@"清空" style:UIBarButtonItemStylePlain target:self action:@selector(onClear:)];
     _tableView.separatorStyle=UITableViewCellSeparatorStyleNone;
     

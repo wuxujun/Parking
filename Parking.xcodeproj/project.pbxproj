@@ -419,6 +419,12 @@
 		427930C61BB973F100C8EA33 /* DMLazyScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 427930C51BB973F100C8EA33 /* DMLazyScrollView.m */; settings = {ASSET_TAGS = (); }; };
 		427930C91BB9800D00C8EA33 /* HomeInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 427930C81BB9800D00C8EA33 /* HomeInfoViewController.m */; settings = {ASSET_TAGS = (); }; };
 		427CBCF51B953AA90017750E /* StringUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 427CBCF41B953AA90017750E /* StringUtil.m */; };
+		4294F4A11BCB59BC00DA331B /* SelectViewPopup.m in Sources */ = {isa = PBXBuildFile; fileRef = 4294F4A01BCB59BC00DA331B /* SelectViewPopup.m */; settings = {ASSET_TAGS = (); }; };
+		4294F51F1BCB979C00DA331B /* userPosition@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4294F51A1BCB979C00DA331B /* userPosition@3x.png */; settings = {ASSET_TAGS = (); }; };
+		4294F5201BCB979C00DA331B /* default_common_navibar_prev_highlighted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4294F51B1BCB979C00DA331B /* default_common_navibar_prev_highlighted@2x.png */; settings = {ASSET_TAGS = (); }; };
+		4294F5211BCB979C00DA331B /* default_common_navibar_prev_highlighted@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4294F51C1BCB979C00DA331B /* default_common_navibar_prev_highlighted@3x.png */; settings = {ASSET_TAGS = (); }; };
+		4294F5221BCB979C00DA331B /* default_common_navibar_prev_normal@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4294F51D1BCB979C00DA331B /* default_common_navibar_prev_normal@2x.png */; settings = {ASSET_TAGS = (); }; };
+		4294F5231BCB979C00DA331B /* default_common_navibar_prev_normal@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4294F51E1BCB979C00DA331B /* default_common_navibar_prev_normal@3x.png */; settings = {ASSET_TAGS = (); }; };
 		429AA1D91B9BD2E90095BEA3 /* icon_blue_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 429AA1D71B9BD2E80095BEA3 /* icon_blue_bg@2x.png */; };
 		429AA1DA1B9BD2E90095BEA3 /* icon_blue_bg@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 429AA1D81B9BD2E80095BEA3 /* icon_blue_bg@3x.png */; };
 		429AA1DD1B9BDEA00095BEA3 /* ListViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 429AA1DC1B9BDEA00095BEA3 /* ListViewCell.m */; };
@@ -1122,6 +1128,13 @@
 		427930C81BB9800D00C8EA33 /* HomeInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeInfoViewController.m; sourceTree = "<group>"; };
 		427CBCF31B953AA90017750E /* StringUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringUtil.h; sourceTree = "<group>"; };
 		427CBCF41B953AA90017750E /* StringUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StringUtil.m; sourceTree = "<group>"; };
+		4294F49F1BCB59BC00DA331B /* SelectViewPopup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectViewPopup.h; sourceTree = "<group>"; };
+		4294F4A01BCB59BC00DA331B /* SelectViewPopup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectViewPopup.m; sourceTree = "<group>"; };
+		4294F51A1BCB979C00DA331B /* userPosition@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "userPosition@3x.png"; sourceTree = "<group>"; };
+		4294F51B1BCB979C00DA331B /* default_common_navibar_prev_highlighted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default_common_navibar_prev_highlighted@2x.png"; sourceTree = "<group>"; };
+		4294F51C1BCB979C00DA331B /* default_common_navibar_prev_highlighted@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default_common_navibar_prev_highlighted@3x.png"; sourceTree = "<group>"; };
+		4294F51D1BCB979C00DA331B /* default_common_navibar_prev_normal@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default_common_navibar_prev_normal@2x.png"; sourceTree = "<group>"; };
+		4294F51E1BCB979C00DA331B /* default_common_navibar_prev_normal@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default_common_navibar_prev_normal@3x.png"; sourceTree = "<group>"; };
 		429AA1D71B9BD2E80095BEA3 /* icon_blue_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_blue_bg@2x.png"; sourceTree = "<group>"; };
 		429AA1D81B9BD2E80095BEA3 /* icon_blue_bg@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_blue_bg@3x.png"; sourceTree = "<group>"; };
 		429AA1DB1B9BDEA00095BEA3 /* ListViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListViewCell.h; sourceTree = "<group>"; };
@@ -1745,6 +1758,8 @@
 				42A02AC41BC8D152006CCFCE /* SearchAView.m */,
 				42A02AD21BC9FCF0006CCFCE /* ShareQRCodeView.h */,
 				42A02AD31BC9FCF0006CCFCE /* ShareQRCodeView.m */,
+				4294F49F1BCB59BC00DA331B /* SelectViewPopup.h */,
+				4294F4A01BCB59BC00DA331B /* SelectViewPopup.m */,
 			);
 			path = CustView;
 			sourceTree = "<group>";
@@ -1752,6 +1767,11 @@
 		420B6C0F1970289C0008F698 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				4294F51A1BCB979C00DA331B /* userPosition@3x.png */,
+				4294F51B1BCB979C00DA331B /* default_common_navibar_prev_highlighted@2x.png */,
+				4294F51C1BCB979C00DA331B /* default_common_navibar_prev_highlighted@3x.png */,
+				4294F51D1BCB979C00DA331B /* default_common_navibar_prev_normal@2x.png */,
+				4294F51E1BCB979C00DA331B /* default_common_navibar_prev_normal@3x.png */,
 				42A02B571BCA163C006CCFCE /* ic_share_app.png */,
 				42A02AC81BC9FA55006CCFCE /* ic_start_bg@2x.png */,
 				42A02AC91BC9FA55006CCFCE /* ic_start_icon@2x.png */,
@@ -2618,6 +2638,7 @@
 				426BD06C1BB7893000330002 /* ic_menu_about@2x.png in Resources */,
 				426BD0911BB78CE300330002 /* tab_menu_service.png in Resources */,
 				4243EA091BAC103000481C43 /* default_layer_takephoto_normal@2x.png in Resources */,
+				4294F5201BCB979C00DA331B /* default_common_navibar_prev_highlighted@2x.png in Resources */,
 				420838121BA9010B00A9CE28 /* ic_parking_org_fee_s@2x.png in Resources */,
 				42EC0A751B96A24B0025168F /* map_route_turn_right_side_ic@2x.png in Resources */,
 				420837F01BA9010B00A9CE28 /* ic_bus_red_s@2x.png in Resources */,
@@ -2698,7 +2719,9 @@
 				42E723981BBEB8BB00190B53 /* default_generalsearch_poi_2_normal@2x.png in Resources */,
 				42EC0A671B96A24B0025168F /* map_route_turn_branch_left@2x.png in Resources */,
 				42E723CA1BBEBC7800190B53 /* default_generalsearch_poi_7_normal@3x.png in Resources */,
+				4294F5211BCB979C00DA331B /* default_common_navibar_prev_highlighted@3x.png in Resources */,
 				42C8C4871BAAA8AE006175E9 /* default_generalsearch_onceback@3x.png in Resources */,
+				4294F51F1BCB979C00DA331B /* userPosition@3x.png in Resources */,
 				420837F41BA9010B00A9CE28 /* ic_bus_red_s3@2x.png in Resources */,
 				42E723C81BBEBC7800190B53 /* default_generalsearch_poi_6_normal@3x.png in Resources */,
 				42E723711BBE5A9900190B53 /* setting_layer.json in Resources */,
@@ -2816,6 +2839,7 @@
 				42A02B3F1BCA1042006CCFCE /* UMSnsAccountViewController.xib in Resources */,
 				4243E9E61BAAB04100481C43 /* intruduce_1.png in Resources */,
 				420837F81BA9010B00A9CE28 /* ic_parking_blue_fee_s2@2x.png in Resources */,
+				4294F5221BCB979C00DA331B /* default_common_navibar_prev_normal@2x.png in Resources */,
 				42E723A11BBEB8BB00190B53 /* default_generalsearch_poi_7_highlight@2x.png in Resources */,
 				42723C661BC663A90045FBB0 /* ic_menu_search@2x.png in Resources */,
 				4208390F1BA9545000A9CE28 /* default_path_car_action_tofwq@3x.png in Resources */,
@@ -2884,6 +2908,7 @@
 				42E723C01BBEBC7800190B53 /* default_generalsearch_poi_2_normal@3x.png in Resources */,
 				42F224E71BB27720009620F2 /* ic_parking@2x.png in Resources */,
 				4243E9FB1BABB92700481C43 /* default_common_checkbutton_icon_highlighted@3x.png in Resources */,
+				4294F5231BCB979C00DA331B /* default_common_navibar_prev_normal@3x.png in Resources */,
 				426BD0811BB7893000330002 /* ic_menu_update@2x.png in Resources */,
 				426C70B91B93F0650054C5B9 /* default_main_gpsnormalbutton_image_disabled@2x.png in Resources */,
 				426BD0771BB7893000330002 /* ic_menu_query.png in Resources */,
@@ -3028,6 +3053,7 @@
 				420838781BA9231400A9CE28 /* NSObject+MKBlockAdditions.m in Sources */,
 				429AA1DD1B9BDEA00095BEA3 /* ListViewCell.m in Sources */,
 				420838321BA911E300A9CE28 /* CollectViewController.m in Sources */,
+				4294F4A11BCB59BC00DA331B /* SelectViewPopup.m in Sources */,
 				420838501BA9175800A9CE28 /* TrafficViewContrller.m in Sources */,
 				4208383E1BA9134900A9CE28 /* FeedbackViewController.m in Sources */,
 				420B6C591970289C0008F698 /* VerticallyAlignedLabel.m in Sources */,

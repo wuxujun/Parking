@@ -95,9 +95,9 @@
 
 -(IBAction)onCollect:(id)sender
 {
-    NSInteger count=[[DBManager getInstance] queryCollectCountWithId:[self.infoDict objectForKey:@"uid"]];
+    NSInteger count=[[DBManager getInstance] queryCollectCountWithId:[self.infoDict objectForKey:@"poiId"]];
     if (count>0) {
-        [[DBManager getInstance] deleteCollect:[self.infoDict objectForKey:@"uid"]];
+        [[DBManager getInstance] deleteCollect:[self.infoDict objectForKey:@"poiId"]];
         [self addRightFavoriteButton:NO action:@selector(onCollect:)];
     }else{
         NSMutableDictionary* dict=[[NSMutableDictionary alloc]init];

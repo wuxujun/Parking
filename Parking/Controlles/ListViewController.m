@@ -239,10 +239,12 @@
                 BListViewController* dController=[[BListViewController alloc]init];
                 dController.infoDict=view.infoDict;
                 dController.startPoint=self.startPoint;
+                dController.cityCode=self.cityCode;
                 [self.navigationController pushViewController:dController animated:YES];
             }else{
                 DetailViewController* dController=[[DetailViewController alloc]init];
                 dController.infoDict=view.infoDict;
+                dController.cityCode=self.cityCode;
                 [self.navigationController pushViewController:dController animated:YES];
             }
             break;
@@ -253,6 +255,7 @@
             dController.lineType=self.dataType;
             [dController setStartPoint:self.startPoint];
             [dController setEndPoint:view.infoDict];
+            [dController setCityCode:self.cityCode];
             [self.navigationController pushViewController:dController animated:YES];
         }
             break;
