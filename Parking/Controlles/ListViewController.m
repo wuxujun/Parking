@@ -138,29 +138,16 @@
 }
 -(void)loadLocalData
 {
-    NSString* charge=[UserDefaultHelper objectForKey:CONF_PARKING_MAP_CHARGE];
-    if ([charge isEqualToString:@"0"]) {
-        [cityButton setTitle:@"免费" forState:UIControlStateNormal];
-        currentCharge=@"0";
-    }else if([charge isEqualToString:@"1"]){
-        [cityButton setTitle:@"收费" forState:UIControlStateNormal];
-        currentCharge=@"1";
-    }else{
-        [cityButton setTitle:@"价格不限" forState:UIControlStateNormal];
-        currentCharge=@"2";
-    }
-    
-    NSString* type=[UserDefaultHelper objectForKey:CONF_PARKING_MAP_TYPE];
-    if ([type isEqualToString:@"0"]) {
-        currentType=@"0";
-        [typeButton setTitle:@"全部类型" forState:UIControlStateNormal];
-    }else{
-        currentType=type;
-        [typeButton setTitle:currentType forState:UIControlStateNormal];
-    }
-    
     [_datas removeAllObjects];
-    NSArray* array=[[DBManager getInstance] queryPoiInfo:currentCharge forType:currentType];
+    NSString *charge=[UserDefaultHelper objectForKey:CONF_PARKING_MAP_CHARGE];
+    NSString* status=[UserDefaultHelper objectForKey:CONF_PARKING_MAP_STATUS];
+    NSString* type=[UserDefaultHelper objectForKey:CONF_PARKING_MAP_TYPE];
+    if (self.dataType!=1) {
+        charge=@"0";
+        status=@"0";
+        type=@"0";
+    }
+    NSArray* array=[[DBManager getInstance] queryPoiInfo:charge forType:type forStatus:status];
     if ([array count]>0) {
         [_datas addObjectsFromArray:array];
     }
@@ -175,10 +162,11 @@
         [self setCenterTitle:@"停车场列表"];
     }else if(self.dataType==2){
         [self setCenterTitle:@"公共自行车列表"];
-    }else{
+    }else if(self.dataType==3){
         [self setCenterTitle:@"公交站列表"];
+    }else{
+        [self setCenterTitle:@"目的的列表"];
     }
-    
 }
 
 -(void)viewDidAppear:(BOOL)animated

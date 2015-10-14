@@ -10,6 +10,8 @@
 #import "UserDefaultHelper.h"
 #import <QuartzCore/QuartzCore.h>
 #import "UIButton+Bootstrap.h"
+#import "WXApi.h"
+#import <TencentOpenAPI/TencentOAuth.h>
 
 #define RGBA(a, b, c, d) [UIColor colorWithRed:(a / 255.0f) green:(b / 255.0f) blue:(c / 255.0f) alpha:d]
 
@@ -35,6 +37,11 @@
 {
     NSMutableArray      *data;
     UITableView         *mTableView;
+    
+    NSInteger           rowCount;
+    
+    BOOL                isQQInstall;
+    BOOL                isWeixinInstall;
 }
 @property(nonatomic,strong)UIButton     *containerButton;
 
@@ -50,7 +57,10 @@
         // Initialization code
         delegate=aDelegate;
         data=[[NSMutableArray alloc]init];
-        
+        rowCount=1;
+        if (frame.size.height==MENU_ITEM_HEIGHT*2) {
+            rowCount=2;
+        }
         self.containerButton = [[UIButton alloc] init];
         [self.containerButton setBackgroundColor:CONTAINER_BG_COLOR];
         [self.containerButton addTarget:self action:@selector(dismissPopover) forControlEvents:UIControlEventTouchUpInside];
@@ -77,15 +87,32 @@
         
         [self addSubview:mTableView];
         
+        [self initShareData];
+
         [self.containerButton addSubview:self];
     }
     return self;
 }
 
+-(void)initShareData
+{
+    isWeixinInstall=NO;
+    isQQInstall=NO;
+    if ([TencentOAuth iphoneQQInstalled]&&[TencentOAuth iphoneQQSupportSSOLogin]) {
+        isQQInstall=YES;
+    }
+    if ([WXApi isWXAppInstalled]) {
+        isWeixinInstall=YES;
+    }
+}
+
+
 -(IBAction)onButton:(id)sender
 {
-    if ([delegate respondsToSelector:@selector(onClickShareMore:)]) {
-        [delegate onClickShareMore:self];
+    UIButton* btn=(UIButton*)sender;
+    
+    if ([delegate respondsToSelector:@selector(onClickShareItem:forIndex:)]) {
+        [delegate onClickShareItem:self forIndex:btn.tag];
     }
 }
 
@@ -99,15 +126,15 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row==0) {
-        return (SCREEN_HEIGHT/2.0-MENU_ITEM_HEIGHT);
+    if (rowCount==1) {
+        return SCREEN_HEIGHT/2.0;
     }
     return MENU_ITEM_HEIGHT;
 }
 
 - (NSInteger)tableView:(UITableView *)table numberOfRowsInSection:(NSInteger)section
 {
-    return 2;
+    return rowCount;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -121,26 +148,29 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
     }
     
-    if(indexPath.row==0){
-        float h=SCREEN_HEIGHT/2.0-10-MENU_ITEM_HEIGHT;
-        
+    if(rowCount==1){
+        float h=SCREEN_HEIGHT/2.0-10;
         UIImageView* imageView=[[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH-h)/2.0, 5, h, h)];
         [imageView setImage:[UIImage imageNamed:@"qrcode"]];
         [imageView setContentMode:UIViewContentModeScaleToFill];
         [cell addSubview:imageView];
+ 
     }else{
-        
-        UIButton* btn=[[UIButton alloc]initWithFrame:CGRectMake(20, 10, SCREEN_WIDTH-40, 44)];
-        [btn.titleLabel setFont:[UIFont systemFontOfSize:16.0f]];
-        [btn setTitleColor:DEFAULT_FONT_COLOR forState:UIControlStateNormal];
-        [btn setTitle:@"更多分享" forState:UIControlStateNormal];
-        [btn addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-                
-        [btn.layer setBorderWidth:0.5];
-        [btn.layer setMasksToBounds:YES];
-        [btn.layer setCornerRadius:4.0f];
-        [btn blueStyle];
-        [cell addSubview:btn];
+        float w=SCREEN_WIDTH/4;
+        float h=46;
+        for (int i=0; i<4; i++) {
+            UIButton* btn=[[UIButton alloc]initWithFrame:CGRectMake(i*w+(w-46)/2,2, h, h)];
+            [btn setTag:((indexPath.row+1)*10+i)];
+            [btn setImage:[UIImage imageNamed:[self getShareIcon:indexPath.row forIndex:i]] forState:UIControlStateNormal];
+            [btn addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
+            [cell addSubview:btn];
+            [self setSharedButton:btn forRow:indexPath.row forIndex:i];
+            UILabel*  lb=[[UILabel alloc]initWithFrame:CGRectMake(i*w, 64-24, w, 26)];
+            [lb setText:[self getShareTitle:indexPath.row forIndex:i]];
+            [lb setTextAlignment:NSTextAlignmentCenter];
+            [lb setFont:[UIFont systemFontOfSize:12.0]];
+            [cell addSubview:lb];
+        }
     }
     [cell setSelectionStyle:UITableViewCellSelectionStyleNone];
     [cell setBackgroundColor:[UIColor clearColor]];
@@ -155,12 +185,112 @@
     //    [self hide];
 }
 
--(IBAction)switchStatus:(id)sender
+-(void)setSharedButton:(UIButton*)btn forRow:(NSInteger)row forIndex:(NSInteger)idx
 {
-    UISwitch* sw=(UISwitch*)sender;
-    [[NSUserDefaults standardUserDefaults] setBool:sw.isOn forKey:CONF_PARKING_MOVE_SHOW];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    if (row==0) {
+        switch (idx) {
+            case 1:
+                [btn setEnabled:isWeixinInstall];
+                break;
+            case 2:
+                [btn setEnabled:isWeixinInstall];
+                break;
+            case 3:
+                [btn setEnabled:isQQInstall];
+            default:
+                break;
+        }
+    }else{
+        switch (idx) {
+            case 0:
+                [btn setEnabled:isQQInstall];
+                break;
+            default:
+                break;
+        }
+    }
 }
+
+-(NSString*)getShareTitle:(NSInteger)row forIndex:(NSInteger)idx
+{
+    NSString* img=@"微博";
+    if (row==0) {
+        switch (idx) {
+            case 0:
+                img=@"微博";
+                break;
+            case 1:
+                img=@"微信";
+                break;
+            case 2:
+                img=@"朋友圈";
+                break;
+            case 3:
+                img=@"QQ";
+                break;
+            default:
+                break;
+        }
+    }else{
+        switch (idx) {
+            case 0:
+                img=@"QQ空间";
+                break;
+            case 1:
+                img=@"消息";
+                break;
+            case 2:
+                img=@"邮件";
+                break;
+            case 3:
+                img=@"二维码";
+            default:
+                break;
+        }
+    }
+    return img;
+}
+
+-(NSString*)getShareIcon:(NSInteger)row forIndex:(NSInteger)idx
+{
+    NSString* img=@"share_platform_sina";
+    if (row==0) {
+        switch (idx) {
+            case 0:
+                img=@"share_platform_sina";
+                break;
+            case 1:
+                img=@"share_platform_wechat";
+                break;
+            case 2:
+                img=@"share_platform_wechattimeline";
+                break;
+            case 3:
+                img=@"share_platform_qqfriends";
+                break;
+            default:
+                break;
+        }
+    }else{
+        switch (idx) {
+            case 0:
+                img=@"share_platform_qzone";
+                break;
+            case 1:
+                img=@"share_platform_imessage";
+                break;
+            case 2:
+                img=@"share_platform_email@2x";
+                break;
+            case 3:
+                img=@"qrcode";
+            default:
+                break;
+        }
+    }
+    return img;
+}
+
 #pragma mark -
 #pragma mark Actions
 

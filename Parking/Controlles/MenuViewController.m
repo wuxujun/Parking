@@ -30,11 +30,15 @@
     
     data=[[NSMutableArray alloc]init];
     
-    headView=[[MenuHeadView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 140) delegate:self];
+    int headHeight=100;
+    if (APPSTORE_VERSION==0) {
+        headHeight=140;
+    }
+    headView=[[MenuHeadView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, headHeight) delegate:self];
     [self.view addSubview:headView];
     
     if (_tableView==nil) {
-        _tableView=[[UITableView alloc]initWithFrame:CGRectMake(0, 140, SCREEN_WIDTH, SCREEN_HEIGHT-140)];
+        _tableView=[[UITableView alloc]initWithFrame:CGRectMake(0, headHeight, SCREEN_WIDTH, SCREEN_HEIGHT-headHeight)];
         _tableView.dataSource=self;
         _tableView.delegate=self;
         _tableView.showsVerticalScrollIndicator=NO;
@@ -58,7 +62,9 @@
 {
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"高级搜索",@"title",@"0",@"type",@"ic_menu_search",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"交通公告",@"title",@"1",@"type",@"ic_menu_notice",@"image", nil]];
-    [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"预定车位",@"title",@"2",@"type",@"ic_menu_yd",@"image", nil]];
+    if (APPSTORE_VERSION==0) {
+        [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"预定车位",@"title",@"2",@"type",@"ic_menu_yd",@"image", nil]];
+    }
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"车位记录",@"title",@"3",@"type",@"ic_menu_query",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"设置",@"title",@"4",@"type",@"ic_menu_set",@"image", nil]];
     [data addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"操作指南",@"title",@"5",@"type",@"ic_menu_guide",@"image", nil]];

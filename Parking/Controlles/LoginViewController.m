@@ -102,7 +102,7 @@
             [UserDefaultHelper setObject:passwordStr forKey:PRE_LOGIN_PASSWORD];
             [myself.navigationController popViewControllerAnimated:YES];
         } error:^(NSError *error) {
-            [self alertRequestResult:@"登录失败"];
+            [self alertRequestResult:@"用户名或密码错误."];
             [myself.view showHUDLoadingView:NO];
         }];
     }

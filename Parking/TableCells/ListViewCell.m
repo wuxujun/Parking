@@ -37,9 +37,9 @@
     [contentView setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
     
     
-//    iconIV=[[UIImageView alloc] init];
-//    iconIV.image = [UIImage imageNamed:@"person"];
-//    [contentView addSubview:iconIV];
+    iconIV=[[UIImageView alloc] init];
+    iconIV.image = [UIImage imageNamed:@"parking"];
+    [contentView addSubview:iconIV];
     
     titleLabel=[[UILabel alloc]init];
     titleLabel.backgroundColor = [UIColor clearColor];
@@ -49,7 +49,7 @@
     
     distanceLabel=[[UILabel alloc]init];
     distanceLabel.textColor=DEFAULT_FONT_COLOR;
-    [distanceLabel setFont:[UIFont systemFontOfSize:12.0f]];
+    [distanceLabel setFont:[UIFont systemFontOfSize:10.0f]];
     [distanceLabel setTextAlignment:NSTextAlignmentRight];
     [distanceLabel setText:@"100m"];
     [contentView addSubview:distanceLabel];
@@ -131,19 +131,20 @@
     [contentView setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
     
     CGSize contentViewArea=CGSizeMake(contentView.frame.size.width, contentView.frame.size.height);
-//    [iconIV sizeToFit];
-//    [iconIV setFrame:CGRectMake(10, 5,100, 80)];
+    [iconIV sizeToFit];
+    [iconIV setFrame:CGRectMake(5, 10,80, 60)];
+    
     [spIV setFrame:CGRectMake(contentViewArea.width/2, contentViewArea.height-25, 0.5f, 15.0f)];
     
-    [titleLabel setFrame:CGRectMake(10, 5, contentViewArea.width-80, 30)];
-    [addressLabel setFrame:CGRectMake(10, 30, contentViewArea.width-120, 20)];
-    [priceLabel setFrame:CGRectMake(10, 50, contentViewArea.width-130, 20)];
-    [distanceLabel setFrame:CGRectMake(contentViewArea.width-120, 5, 100, 30)];
+    [titleLabel setFrame:CGRectMake(90, 5, contentViewArea.width-140, 30)];
+    [addressLabel setFrame:CGRectMake(90, 30, contentViewArea.width-120, 20)];
+    [priceLabel setFrame:CGRectMake(90, 50, contentViewArea.width-130, 20)];
+    [distanceLabel setFrame:CGRectMake(contentViewArea.width-110, 5, 100, 30)];
     
     float w=(contentViewArea.width-20)/2;
     [lineButton setFrame:CGRectMake(10, contentViewArea.height-30, w, 30)];
     [lineIV setFrame:CGRectMake(50, contentViewArea.height-24, 18, 18)];
-    [naviButton setFrame:CGRectMake(10+w, contentViewArea.height-30, w, 30)];
+    [naviButton setFrame:CGRectMake(20+w, contentViewArea.height-30, w, 30)];
     [naviIV setFrame:CGRectMake(50+w, contentViewArea.height-24, 18, 18)];
 }
 
@@ -178,7 +179,7 @@
 //        
 //    }else{
         if ([self.infoDict objectForKey:@"distance"]) {
-            [distanceLabel setText:[NSString stringWithFormat:@"距离:%@",[NSString caleDistance:[[self.infoDict objectForKey:@"distance"]integerValue]]]];
+            [distanceLabel setText:[NSString stringWithFormat:@"%@",[NSString caleDistance:[[self.infoDict objectForKey:@"distance"]integerValue]]]];
         }
 //    }
     if(sourceType==1&&dType==2){

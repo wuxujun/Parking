@@ -17,6 +17,8 @@
     #import <OpenUDID.h>
 #endif
 
+#define APPSTORE_VERSION    1
+
 #define DB_FILE_NAME  @"parking.sqlite"
 #define kAppId   @"606569eb-5dc8-43d7-935b-ccfa56f5ba4b"
 #define kHttpUrl @"https://api.i-carparking.com:2889/zhtc/"

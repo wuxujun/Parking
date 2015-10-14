@@ -276,6 +276,21 @@
 		421105501BB0EBAC002FC9D8 /* SearchHisEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 4211054F1BB0EBAC002FC9D8 /* SearchHisEntity.m */; settings = {ASSET_TAGS = (); }; };
 		421105531BB0EE73002FC9D8 /* CollectEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 421105521BB0EE73002FC9D8 /* CollectEntity.m */; settings = {ASSET_TAGS = (); }; };
 		421105551BB0F94A002FC9D8 /* parking.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 421105541BB0F94A002FC9D8 /* parking.sqlite */; settings = {ASSET_TAGS = (); }; };
+		421957661BCDEB17003B7561 /* ic_bicycle.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957651BCDEB17003B7561 /* ic_bicycle.png */; settings = {ASSET_TAGS = (); }; };
+		421957751BCDF891003B7561 /* share_platform_imessage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957671BCDF891003B7561 /* share_platform_imessage@2x.png */; settings = {ASSET_TAGS = (); }; };
+		421957761BCDF891003B7561 /* share_platform_qqfriends.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957681BCDF891003B7561 /* share_platform_qqfriends.png */; settings = {ASSET_TAGS = (); }; };
+		421957771BCDF891003B7561 /* share_platform_sina@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957691BCDF891003B7561 /* share_platform_sina@2x.png */; settings = {ASSET_TAGS = (); }; };
+		421957781BCDF891003B7561 /* share_platform_email@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4219576A1BCDF891003B7561 /* share_platform_email@2x.png */; settings = {ASSET_TAGS = (); }; };
+		421957791BCDF891003B7561 /* share_platform_qzone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4219576B1BCDF891003B7561 /* share_platform_qzone@2x.png */; settings = {ASSET_TAGS = (); }; };
+		4219577A1BCDF891003B7561 /* share_platform_qqfriends@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4219576C1BCDF891003B7561 /* share_platform_qqfriends@2x.png */; settings = {ASSET_TAGS = (); }; };
+		4219577B1BCDF891003B7561 /* share_platform_sina.png in Resources */ = {isa = PBXBuildFile; fileRef = 4219576D1BCDF891003B7561 /* share_platform_sina.png */; settings = {ASSET_TAGS = (); }; };
+		4219577C1BCDF891003B7561 /* share_platform_email.png in Resources */ = {isa = PBXBuildFile; fileRef = 4219576E1BCDF891003B7561 /* share_platform_email.png */; settings = {ASSET_TAGS = (); }; };
+		4219577D1BCDF891003B7561 /* share_platform_qzone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4219576F1BCDF891003B7561 /* share_platform_qzone.png */; settings = {ASSET_TAGS = (); }; };
+		4219577E1BCDF891003B7561 /* share_platform_wechat.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957701BCDF891003B7561 /* share_platform_wechat.png */; settings = {ASSET_TAGS = (); }; };
+		4219577F1BCDF891003B7561 /* share_platform_wechattimeline.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957711BCDF891003B7561 /* share_platform_wechattimeline.png */; settings = {ASSET_TAGS = (); }; };
+		421957801BCDF891003B7561 /* share_platform_imessage.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957721BCDF891003B7561 /* share_platform_imessage.png */; settings = {ASSET_TAGS = (); }; };
+		421957811BCDF891003B7561 /* share_platform_wechat@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957731BCDF891003B7561 /* share_platform_wechat@2x.png */; settings = {ASSET_TAGS = (); }; };
+		421957821BCDF891003B7561 /* share_platform_wechattimeline@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 421957741BCDF891003B7561 /* share_platform_wechattimeline@2x.png */; settings = {ASSET_TAGS = (); }; };
 		42240F121A25D250000E3176 /* EGORefreshTableHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 42240F0E1A25D250000E3176 /* EGORefreshTableHeaderView.m */; };
 		42240F131A25D250000E3176 /* PullRefreshViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 42240F101A25D250000E3176 /* PullRefreshViewController.m */; };
 		42240F181A25D2B1000E3176 /* SIAlertView.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 42240F151A25D2B1000E3176 /* SIAlertView.bundle */; };
@@ -961,6 +976,21 @@
 		421105511BB0EE73002FC9D8 /* CollectEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectEntity.h; sourceTree = "<group>"; };
 		421105521BB0EE73002FC9D8 /* CollectEntity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectEntity.m; sourceTree = "<group>"; };
 		421105541BB0F94A002FC9D8 /* parking.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = parking.sqlite; sourceTree = "<group>"; };
+		421957651BCDEB17003B7561 /* ic_bicycle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_bicycle.png; sourceTree = "<group>"; };
+		421957671BCDF891003B7561 /* share_platform_imessage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_platform_imessage@2x.png"; sourceTree = "<group>"; };
+		421957681BCDF891003B7561 /* share_platform_qqfriends.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_platform_qqfriends.png; sourceTree = "<group>"; };
+		421957691BCDF891003B7561 /* share_platform_sina@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_platform_sina@2x.png"; sourceTree = "<group>"; };
+		4219576A1BCDF891003B7561 /* share_platform_email@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_platform_email@2x.png"; sourceTree = "<group>"; };
+		4219576B1BCDF891003B7561 /* share_platform_qzone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_platform_qzone@2x.png"; sourceTree = "<group>"; };
+		4219576C1BCDF891003B7561 /* share_platform_qqfriends@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_platform_qqfriends@2x.png"; sourceTree = "<group>"; };
+		4219576D1BCDF891003B7561 /* share_platform_sina.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_platform_sina.png; sourceTree = "<group>"; };
+		4219576E1BCDF891003B7561 /* share_platform_email.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_platform_email.png; sourceTree = "<group>"; };
+		4219576F1BCDF891003B7561 /* share_platform_qzone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_platform_qzone.png; sourceTree = "<group>"; };
+		421957701BCDF891003B7561 /* share_platform_wechat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_platform_wechat.png; sourceTree = "<group>"; };
+		421957711BCDF891003B7561 /* share_platform_wechattimeline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_platform_wechattimeline.png; sourceTree = "<group>"; };
+		421957721BCDF891003B7561 /* share_platform_imessage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_platform_imessage.png; sourceTree = "<group>"; };
+		421957731BCDF891003B7561 /* share_platform_wechat@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_platform_wechat@2x.png"; sourceTree = "<group>"; };
+		421957741BCDF891003B7561 /* share_platform_wechattimeline@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_platform_wechattimeline@2x.png"; sourceTree = "<group>"; };
 		42240F0D1A25D250000E3176 /* EGORefreshTableHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EGORefreshTableHeaderView.h; sourceTree = "<group>"; };
 		42240F0E1A25D250000E3176 /* EGORefreshTableHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EGORefreshTableHeaderView.m; sourceTree = "<group>"; };
 		42240F0F1A25D250000E3176 /* PullRefreshViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PullRefreshViewController.h; sourceTree = "<group>"; };
@@ -1767,6 +1797,21 @@
 		420B6C0F1970289C0008F698 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				421957671BCDF891003B7561 /* share_platform_imessage@2x.png */,
+				421957681BCDF891003B7561 /* share_platform_qqfriends.png */,
+				421957691BCDF891003B7561 /* share_platform_sina@2x.png */,
+				4219576A1BCDF891003B7561 /* share_platform_email@2x.png */,
+				4219576B1BCDF891003B7561 /* share_platform_qzone@2x.png */,
+				4219576C1BCDF891003B7561 /* share_platform_qqfriends@2x.png */,
+				4219576D1BCDF891003B7561 /* share_platform_sina.png */,
+				4219576E1BCDF891003B7561 /* share_platform_email.png */,
+				4219576F1BCDF891003B7561 /* share_platform_qzone.png */,
+				421957701BCDF891003B7561 /* share_platform_wechat.png */,
+				421957711BCDF891003B7561 /* share_platform_wechattimeline.png */,
+				421957721BCDF891003B7561 /* share_platform_imessage.png */,
+				421957731BCDF891003B7561 /* share_platform_wechat@2x.png */,
+				421957741BCDF891003B7561 /* share_platform_wechattimeline@2x.png */,
+				421957651BCDEB17003B7561 /* ic_bicycle.png */,
 				4294F51A1BCB979C00DA331B /* userPosition@3x.png */,
 				4294F51B1BCB979C00DA331B /* default_common_navibar_prev_highlighted@2x.png */,
 				4294F51C1BCB979C00DA331B /* default_common_navibar_prev_highlighted@3x.png */,
@@ -2493,6 +2538,7 @@
 				420838281BA9010B00A9CE28 /* ic_parking_red_s@3x.png in Resources */,
 				420837E71BA9010B00A9CE28 /* ic_bus_green_s2@3x.png in Resources */,
 				4243E9E71BAAB04100481C43 /* intruduce_1@2x.png in Resources */,
+				4219577B1BCDF891003B7561 /* share_platform_sina.png in Resources */,
 				42A02AC71BC8D21F006CCFCE /* search_head.json in Resources */,
 				422BE0571B957F43005646CA /* icon_red_bg@2x.png in Resources */,
 				420838FE1BA9545000A9CE28 /* default_path_car_action_4@2x.png in Resources */,
@@ -2518,6 +2564,8 @@
 				42B454C41B9D20A70010BB69 /* default_main_toolbaritem_navi_normal@3x.png in Resources */,
 				420837FA1BA9010B00A9CE28 /* ic_parking_blue_fee_s3@2x.png in Resources */,
 				4208380C1BA9010B00A9CE28 /* ic_parking_green_s@2x.png in Resources */,
+				421957761BCDF891003B7561 /* share_platform_qqfriends.png in Resources */,
+				421957781BCDF891003B7561 /* share_platform_email@2x.png in Resources */,
 				420837F51BA9010B00A9CE28 /* ic_bus_red_s3@3x.png in Resources */,
 				420B6C7F1970289C0008F698 /* icon_right.png in Resources */,
 				42E7239F1BBEB8BB00190B53 /* default_generalsearch_poi_6_highlight@2x.png in Resources */,
@@ -2526,6 +2574,7 @@
 				426BD0751BB7893000330002 /* ic_menu_notice@2x.png in Resources */,
 				420837F21BA9010B00A9CE28 /* ic_bus_red_s2@2x.png in Resources */,
 				4208390B1BA9545000A9CE28 /* default_path_car_action_22@3x.png in Resources */,
+				421957811BCDF891003B7561 /* share_platform_wechat@2x.png in Resources */,
 				420837E91BA9010B00A9CE28 /* ic_bus_green_s3@3x.png in Resources */,
 				426C70B61B93F0650054C5B9 /* default_main_gpsbutton_background_highlighted@3x.png in Resources */,
 				426BD0901BB78CE300330002 /* tab_menu_notice.png in Resources */,
@@ -2553,6 +2602,7 @@
 				420B6C791970289C0008F698 /* icon_left.png in Resources */,
 				420837F11BA9010B00A9CE28 /* ic_bus_red_s@3x.png in Resources */,
 				42EC0A661B96A24B0025168F /* map_route_turn_branch_left_straight@2x.png in Resources */,
+				421957771BCDF891003B7561 /* share_platform_sina@2x.png in Resources */,
 				4208380B1BA9010B00A9CE28 /* ic_parking_green_fee@3x.png in Resources */,
 				42EC0A651B96A24B0025168F /* map_route_turn_branch_center@2x.png in Resources */,
 				42F224F41BB29A59009620F2 /* default_generalsearch_sugg_tqueryicon_normal@3x.png in Resources */,
@@ -2573,6 +2623,7 @@
 				426C70BA1B93F0650054C5B9 /* default_main_gpsnormalbutton_image_disabled@3x.png in Resources */,
 				426BD07C1BB7893000330002 /* ic_menu_set@3x.png in Resources */,
 				426BD07A1BB7893000330002 /* ic_menu_set.png in Resources */,
+				4219577E1BCDF891003B7561 /* share_platform_wechat.png in Resources */,
 				420839181BA95F4600A9CE28 /* default_busnavi_preview_end@3x.png in Resources */,
 				4208381E1BA9010B00A9CE28 /* ic_parking_org_s3@2x.png in Resources */,
 				42E723CF1BBEBC7800190B53 /* default_generalsearch_poi_10_highlight@3x.png in Resources */,
@@ -2582,6 +2633,7 @@
 				42EC0A701B96A24B0025168F /* map_route_turn_left_side@2x.png in Resources */,
 				4243E9FA1BABB92700481C43 /* default_common_checkbutton_icon_highlighted@2x.png in Resources */,
 				420837C51BA9010B00A9CE28 /* ic_bicycle_blue_s@2x.png in Resources */,
+				421957791BCDF891003B7561 /* share_platform_qzone@2x.png in Resources */,
 				420837EF1BA9010B00A9CE28 /* ic_bus_org_s3@3x.png in Resources */,
 				420838141BA9010B00A9CE28 /* ic_parking_org_fee_s2@2x.png in Resources */,
 				4208390D1BA9545000A9CE28 /* default_path_car_action_end@3x.png in Resources */,
@@ -2623,6 +2675,7 @@
 				420838EC1BA9545000A9CE28 /* default_busnavi_preview_start@2x.png in Resources */,
 				4208391C1BA9605B00A9CE28 /* default_busline_icon_site@3x.png in Resources */,
 				420838291BA9010B00A9CE28 /* ic_parking_red_s2@2x.png in Resources */,
+				421957751BCDF891003B7561 /* share_platform_imessage@2x.png in Resources */,
 				422BE0651B958EB1005646CA /* icon_orange_bg.png in Resources */,
 				4208381A1BA9010B00A9CE28 /* ic_parking_org_s@2x.png in Resources */,
 				4208381B1BA9010B00A9CE28 /* ic_parking_org_s@3x.png in Resources */,
@@ -2676,6 +2729,7 @@
 				426BD0871BB7893000330002 /* icon_navigation@2x.png in Resources */,
 				420839031BA9545000A9CE28 /* default_path_car_action_6@3x.png in Resources */,
 				420839111BA9545000A9CE28 /* default_path_car_action_tosfz@2x.png in Resources */,
+				4219577A1BCDF891003B7561 /* share_platform_qqfriends@2x.png in Resources */,
 				420837F91BA9010B00A9CE28 /* ic_parking_blue_fee_s2@3x.png in Resources */,
 				426C70EC1B9437A20054C5B9 /* default_main_zoombtn_zoomout_disable@2x.png in Resources */,
 				420837D71BA9010B00A9CE28 /* ic_bicycle_red_s@2x.png in Resources */,
@@ -2696,6 +2750,7 @@
 				42A02B391BCA1042006CCFCE /* UMSCommentDetailController.xib in Resources */,
 				42723C671BC663A90045FBB0 /* ic_menu_search@3x.png in Resources */,
 				42F224E11BB27720009620F2 /* ic_parking_s2@3x.png in Resources */,
+				4219577C1BCDF891003B7561 /* share_platform_email.png in Resources */,
 				42B454C11B9D20A70010BB69 /* default_main_toolbaritem_around_normal@2x.png in Resources */,
 				42EC0A6F1B96A24B0025168F /* map_route_turn_left_side_main@2x.png in Resources */,
 				420837CE1BA9010B00A9CE28 /* ic_bicycle_green_s2@3x.png in Resources */,
@@ -2755,6 +2810,7 @@
 				426C70ED1B9437A20054C5B9 /* default_main_zoombtn_zoomout_disable@3x.png in Resources */,
 				420837E31BA9010B00A9CE28 /* ic_bus_blue@4x.png in Resources */,
 				420837E81BA9010B00A9CE28 /* ic_bus_green_s3@2x.png in Resources */,
+				421957821BCDF891003B7561 /* share_platform_wechattimeline@2x.png in Resources */,
 				426C70BB1B93F0650054C5B9 /* default_main_gpsnormalbutton_image_normal@2x.png in Resources */,
 				42E723A51BBEB8BB00190B53 /* default_generalsearch_poi_9_highlight@2x.png in Resources */,
 				420838FB1BA9545000A9CE28 /* default_path_car_action_2@3x.png in Resources */,
@@ -2772,6 +2828,7 @@
 				420837F61BA9010B00A9CE28 /* ic_parking_blue_fee_s@2x.png in Resources */,
 				420838261BA9010B00A9CE28 /* ic_parking_red_fee@3x.png in Resources */,
 				426BD06B1BB7893000330002 /* ic_menu_about.png in Resources */,
+				421957801BCDF891003B7561 /* share_platform_imessage.png in Resources */,
 				420838191BA9010B00A9CE28 /* ic_parking_org_fee@3x.png in Resources */,
 				420839171BA95F4600A9CE28 /* default_busnavi_preview_end@2x.png in Resources */,
 				42B454D01B9D35B00010BB69 /* ic_parking_red@2x.png in Resources */,
@@ -2784,6 +2841,7 @@
 				420838211BA9010B00A9CE28 /* ic_parking_red_fee_s2@2x.png in Resources */,
 				42B454D61B9D36920010BB69 /* ic_parking_blue@2x.png in Resources */,
 				42EC0A741B96A24B0025168F /* map_route_turn_right_front@2x.png in Resources */,
+				421957661BCDEB17003B7561 /* ic_bicycle.png in Resources */,
 				420838F61BA9545000A9CE28 /* default_path_car_action_0@2x.png in Resources */,
 				426BD06D1BB7893000330002 /* ic_menu_about@3x.png in Resources */,
 				4243EA081BAC103000481C43 /* default_layer_selectposition_normal@3x.png in Resources */,
@@ -2791,6 +2849,7 @@
 				42FE3849197199B2007A623F /* userPosition@2x.png in Resources */,
 				42EC0A721B96A24B0025168F /* map_route_turn_outferry@2x.png in Resources */,
 				426BD0711BB7893000330002 /* ic_menu_guide.png in Resources */,
+				4219577F1BCDF891003B7561 /* share_platform_wechattimeline.png in Resources */,
 				42A02AD01BC9FA55006CCFCE /* ic_start_icon@3x.png in Resources */,
 				423195BC1B94AA25002A7E2F /* default_generalsearch_magicbox_icon_03_normal@3x.png in Resources */,
 				42B454EE1B9D38B60010BB69 /* ic_bicycle_green@2x.png in Resources */,
@@ -2851,6 +2910,7 @@
 				423195BB1B94AA25002A7E2F /* default_generalsearch_magicbox_icon_03_normal@2x.png in Resources */,
 				4208380D1BA9010B00A9CE28 /* ic_parking_green_s@3x.png in Resources */,
 				42EC0A621B96A24B0025168F /* end@2x.png in Resources */,
+				4219577D1BCDF891003B7561 /* share_platform_qzone.png in Resources */,
 				42EC0A6C1B96A24B0025168F /* map_route_turn_left_back@2x.png in Resources */,
 				426BD08B1BB7893000330002 /* icon_route@3x.png in Resources */,
 				42C8C4881BAAA8AE006175E9 /* default_main_layer_checkview_highlighted@2x.png in Resources */,
@@ -3228,7 +3288,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: wu xujun (2QKH4QLQMR)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: wu xujun (2QKH4QLQMR)";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3294,7 +3354,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer: wu xujun (2QKH4QLQMR)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: wu xujun (2QKH4QLQMR)";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (

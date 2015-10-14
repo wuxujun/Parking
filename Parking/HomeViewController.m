@@ -68,10 +68,11 @@
 #import "MBProgressHUD.h"
 #import "UIView+LoadingView.h"
 
-@interface HomeViewController ()<CLLocationManagerDelegate,DMLazyScrollViewDelegate,HomeInfoViewControllerDelegate,CustLayerPopupDelegate,SubmitLayerPopupDelegate,ShareQRCodeViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,SelectViewPopupDelegate>
+@interface HomeViewController ()<CLLocationManagerDelegate,DMLazyScrollViewDelegate,HomeInfoViewControllerDelegate,CustLayerPopupDelegate,SubmitLayerPopupDelegate,ShareQRCodeViewDelegate,UMSocialUIDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,SelectViewPopupDelegate>
 {
     CLLocationManager   *locManager;
     MBProgressHUD       *loadingHUD;
+    MBProgressHUD       *tipsHUD;
     
     NSString*       currentCityCode;
     NSString*       currentAdCode;
@@ -197,7 +198,6 @@
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    NSLog(@"123");
     dataTypeLayer=[[UserDefaultHelper objectForKey:CONF_CURRENT_LAYER_TYPE] intValue];
     [self resetMapButton];
 }
@@ -211,7 +211,6 @@
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    NSLog(@"1234");
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -232,8 +231,9 @@
 -(void)readDBData
 {
     [data removeAllObjects];
+    [self clearAllAnnotationPOI];
     NSMutableArray* poiAnnotations=[[NSMutableArray alloc] init];
-    NSArray* array=[[DBManager getInstance]queryPoiInfo:@"0" forType:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_TYPE]];
+    NSArray* array=[[DBManager getInstance] queryPoiInfo:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_CHARGE] forType:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_TYPE] forStatus:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_STATUS]];
     if ([array count]>0) {
         int idx=0;
         for (PoiInfoEntity *entity in array) {
@@ -248,15 +248,19 @@
             }
             idx++;
         }
+        
+        [self.mapView addAnnotations:poiAnnotations];
+        if (bFirstOrTarget) {
+            bMoveing=YES;
+            [self.mapView showAnnotations:poiAnnotations animated:bFirstOrTarget];
+            bMoveing=YES;
+        }
+        bFirstOrTarget=NO;
+        [self reloadFooterData];
+    }else{
+        bLoading=YES;
+        [self serarchForMapCenter:[AMapGeoPoint locationWithLatitude:self.mapView.centerCoordinate.latitude longitude:self.mapView.centerCoordinate.longitude]];
     }
-    [self.mapView addAnnotations:poiAnnotations];
-    if (bFirstOrTarget) {
-        bMoveing=YES;
-        [self.mapView showAnnotations:poiAnnotations animated:bFirstOrTarget];
-        bMoveing=YES;
-    }
-    bFirstOrTarget=NO;
-    [self reloadFooterData];
 }
 
 -(void)resetMapButton
@@ -339,9 +343,11 @@
         loadingHUD.mode=MBProgressHUDModeText;
         loadingHUD.labelText=title;
         loadingHUD.labelFont=[UIFont systemFontOfSize:12.0f];
-        loadingHUD.graceTime=2.0f;
-        loadingHUD.taskInProgress=YES;
-        [loadingHUD show:YES];
+        [loadingHUD showAnimated:YES whileExecutingBlock:^{
+            sleep(1);
+        } completionBlock:^{
+            
+        }];
     }
 }
 -(void)showHUD
@@ -353,6 +359,26 @@
         loadingHUD.labelText=@"";
         [loadingHUD show:YES];
     }
+}
+
+-(void)showTipsForCenter:(NSString*)msg
+{
+    CGSize detailSize = [msg sizeWithFont:[UIFont systemFontOfSize:14] constrainedToSize:CGSizeMake(300, MAXFLOAT) lineBreakMode:NSLineBreakByWordWrapping];
+    if (tipsHUD==nil) {
+        tipsHUD=[[MBProgressHUD alloc]initWithFrame:CGRectMake((SCREEN_WIDTH-detailSize.width+20)/2, SCREEN_HEIGHT/2, detailSize.width+20, 30)];
+        tipsHUD.mode=MBProgressHUDModeText;
+        tipsHUD.margin=10.0f;
+        tipsHUD.cornerRadius=4.0f;
+        tipsHUD.labelFont=[UIFont systemFontOfSize:14.0];
+    }
+    tipsHUD.labelText=msg;
+    [self.view addSubview:tipsHUD];
+    [tipsHUD showAnimated:YES whileExecutingBlock:^{
+        sleep(1);
+    } completionBlock:^{
+        [tipsHUD removeFromSuperview];
+        tipsHUD=nil;
+    }];
 }
 
 -(void)initCenterSearch
@@ -521,6 +547,15 @@
     }
 }
 
+-(void)onShareView
+{
+    [self.sharePopup dismissPopover];
+    self.sharePopup=[[ShareQRCodeView alloc]initWithFrame:CGRectMake(0, SCREEN_HEIGHT-64*2, SCREEN_WIDTH, 64*2) delegate:self];
+    [self.sharePopup.layer setBorderWidth:0.3f];
+    [self.sharePopup.layer setBorderColor:[[UIColor grayColor] CGColor]];
+    [self.sharePopup showInView:self.view];
+}
+
 -(void)onShareQRCode
 {
     [self.sharePopup dismissPopover];
@@ -530,24 +565,92 @@
     [self.sharePopup showInView:self.view];
 }
 
--(void)onClickShareMore:(ShareQRCodeView *)view
+-(void)didFinishGetUMSocialDataInViewController:(UMSocialResponseEntity *)response
+{
+    if (response.responseCode==UMSResponseCodeSuccess) {
+        HLog(@"%@",response.data);
+        [self showTipsForCenter:@"分享成功"];
+    }
+}
+
+-(void)onClickShareItem:(ShareQRCodeView *)view forIndex:(NSInteger)idx
 {
     [self.sharePopup dismissPopover];
-    NSMutableArray  *ls=[[NSMutableArray alloc] init];
-    [ls addObject:UMShareToSina];
-    [ls addObject:UMShareToTencent];
-    if ([TencentOAuth iphoneQQInstalled]&&[TencentOAuth iphoneQQSupportSSOLogin]) {
-        [ls addObject:UMShareToQQ];
-        [ls addObject:UMShareToQzone];
-    }
-    if ([WXApi isWXAppInstalled]) {
-        [ls addObject:UMShareToWechatSession];
-        [ls addObject:UMShareToWechatTimeline];
-    }
-    [ls addObject:UMShareToSms];
-    [ls addObject:UMShareToEmail];
+    [[UMSocialControllerService defaultControllerService] setShareText:APPSHARE_CONTENT shareImage:[UIImage imageNamed:@"ic_share_app"] socialUIDelegate:self];
     
-    [UMSocialSnsService presentSnsIconSheetView:self appKey:UMENG_APPKEY shareText:APPSHARE_CONTENT shareImage:[UIImage imageNamed:@"ic_share_app"] shareToSnsNames:ls delegate:self];
+    switch (idx) {
+        case 10:{
+            //sina
+            [self showTipsForCenter:@"微博分享中.."];
+            [[UMSocialDataService defaultDataService] postSNSWithTypes:@[UMShareToSina] content:APPSHARE_CONTENT image:[UIImage imageNamed:@"ic_share_app"] location:nil urlResource:nil completion:^(UMSocialResponseEntity *response) {
+                if (response.responseCode==UMSResponseCodeSuccess) {
+                    [self showTipsForCenter:@"分享成功"];
+                }
+            }];
+            break;
+        }
+        case 11:{
+            //UMShareToWechatSession
+            [self showTipsForCenter:@"微信分享中.."];
+            [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToWechatSession].snsClickHandler(self,[UMSocialControllerService defaultControllerService],YES);
+            break;
+        }
+        case 12:{
+            //UMShareToWechatTimeline
+            [self showTipsForCenter:@"朋友圈分享中.."];
+           [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToWechatTimeline].snsClickHandler(self,[UMSocialControllerService defaultControllerService],YES);
+            break;
+        }
+        case 13:{
+            //UMShareToQQ
+            [self showTipsForCenter:@"QQ分享中.."];
+            [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToQQ].snsClickHandler(self,[UMSocialControllerService defaultControllerService],YES);
+            break;
+        }
+            
+        case 20:{
+            //UMShareToQzone
+            [self showTipsForCenter:@"QQ空间分享中.."];
+            [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToQzone].snsClickHandler(self,[UMSocialControllerService defaultControllerService],YES);
+            break;
+        }
+        case 21:{
+            //Sms
+            [self showTipsForCenter:@"短信分享中.."];
+            [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToSms].snsClickHandler(self,[UMSocialControllerService defaultControllerService],YES);
+            break;
+        }
+        case 22:{
+            //Email
+            [self showTipsForCenter:@"邮件分享中.."];
+            [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToEmail].snsClickHandler(self,[UMSocialControllerService defaultControllerService],YES);
+            
+            break;
+        }
+        case 23:{
+            [self onShareQRCode];
+            break;
+        }
+            
+        default:
+            break;
+    }
+    
+//    NSMutableArray  *ls=[[NSMutableArray alloc] init];
+//    [ls addObject:UMShareToSina];
+//    [ls addObject:UMShareToTencent];
+//    if ([TencentOAuth iphoneQQInstalled]&&[TencentOAuth iphoneQQSupportSSOLogin]) {
+//        [ls addObject:UMShareToQQ];
+//        [ls addObject:UMShareToQzone];
+//    }
+//    if ([WXApi isWXAppInstalled]) {
+//        [ls addObject:UMShareToWechatSession];
+//        [ls addObject:UMShareToWechatTimeline];
+//    }
+//    [ls addObject:UMShareToSms];
+//    [ls addObject:UMShareToEmail];
+//    
+//    [UMSocialSnsService presentSnsIconSheetView:self appKey:UMENG_APPKEY shareText:APPSHARE_CONTENT shareImage:[UIImage imageNamed:@"ic_share_app"] shareToSnsNames:ls delegate:self];
 }
 
 -(IBAction)showLocation:(id)sender
@@ -1127,9 +1230,13 @@
     
 //    [params setObject:poi.name forKey:@"searchText"];
 //    [params setObject:[poi objectForKey:@"adCode"] forKey:@"region"];
+    NSDateFormatter* formater=[[NSDateFormatter alloc]init];
+    formater.dateFormat=@"mm-dd HH:mm:ss SSS";
+    HLog(@"%@",[NSString currentTime:formater]);
     [self.networkEngine postOperationWithURLString:requestUrl params:params success:^(MKNetworkOperation *completedOperation, id result) {
         bLoading=NO;
 //        HLog(@"%@",result);
+        HLog(@"%@",[NSString currentTime:formater]);
         if([[result objectForKey:@"status"] intValue]==200){
             if (dataTypeLayer==1) {
                 [self parserParkingResponse:result];
@@ -1145,6 +1252,9 @@
 -(void)parserParkingResponse:(NSDictionary*)result
 {
     id list=[result objectForKey:@"parkingList"];
+    NSDateFormatter* formater=[[NSDateFormatter alloc]init];
+    formater.dateFormat=@"mm-dd HH:mm:ss SSS";
+    HLog(@"---begin ---->%@",[NSString currentTime:formater]);
     [data removeAllObjects];
     if ([list isKindOfClass:[NSArray class]]) {
         for (int i=0; i<[list count]; i++) {
@@ -1154,8 +1264,12 @@
         }
         sourceType=1;
         bSearchResult=YES;
+        HLog(@"----->%@",[NSString currentTime:formater]);
         [self insertDB];
+        HLog(@"----->%@",[NSString currentTime:formater]);
+
         [self readDBData];
+        HLog(@"----end-->%@",[NSString currentTime:formater]);
     }
 }
 
@@ -1277,7 +1391,7 @@
     }
     [self showHUD];
     HLog(@"search city %@   %d",currentCityCode,dataTypeLayer);
-    if ([currentCityCode isEqualToString:@"0579"]&&dataTypeLayer<3) {
+    if ([currentCityCode isEqualToString:@"0579"]&&(dataTypeLayer==1||dataTypeLayer==2)) {
         [self reloadFooterData];
         [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%.6f",point.longitude],@"longitude",[NSString stringWithFormat:@"%.6f",point.latitude],@"latitude",currentAdCode,@"adCode", nil]];
         return;
@@ -1323,19 +1437,20 @@
 
 -(void)viewStatusSwitch:(CustLayerPopup *)view forIndex:(NSInteger)idx
 {
-    
+    [self readDBData];
     [self.layerPopup dismissMenuPopover];
 }
 
 -(void)viewTypeSwitch:(CustLayerPopup *)view forIndex:(NSInteger)idx
 {
     
+    [self readDBData];
     [self.layerPopup dismissMenuPopover];
 }
 
 -(void)viewChargeSwitch:(CustLayerPopup *)view forIndex:(NSInteger)idx
 {
-    
+    [self readDBData];
     [self.layerPopup dismissMenuPopover];
 }
 
@@ -1380,7 +1495,7 @@
         }
         case 6:
         {
-            [self onShareQRCode];
+            [self onShareView];
 //            [[UMSocialDataService defaultDataService] postSNSWithTypes:@[] content:APPSHARE_CONTENT image:nil location:nil urlResource:nil completion:^(UMSocialResponseEntity *response) {
 //                if (response.responseCode==UMSResponseCodeSuccess) {
 //                    

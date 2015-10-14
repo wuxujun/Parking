@@ -105,6 +105,7 @@
 -(void)searchRequest:(id)request didFailWithError:(NSError *)error
 {
     HLog(@"%@   %@",[request class],error);
+    [self alertRequestResult:@"网络请求出错,请重试!" isPop:YES];
 }
 
 #pragma mark - UITableViewDataSource

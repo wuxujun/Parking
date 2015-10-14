@@ -150,7 +150,7 @@
         pointView.centerOffset=CGPointMake(0, -18);
         return pointView;
     }
-    return nil;
+    return [super mapView:mapView viewForAnnotation:annotation];
 }
 
 -(void)showRouteWithNaviRoute:(AMapNaviRoute*)naviRoute

@@ -30,6 +30,7 @@
     
     titleLabel=[[UILabel alloc]init];
     titleLabel.backgroundColor = [UIColor clearColor];
+    [titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
     titleLabel.textColor = DEFAULT_FONT_COLOR;
     [contentView addSubview:titleLabel];
     

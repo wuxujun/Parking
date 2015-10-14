@@ -21,8 +21,7 @@
 
 @end
 
-
 @protocol ShareQRCodeViewDelegate <NSObject>
 
--(void)onClickShareMore:(ShareQRCodeView*)view;
+-(void)onClickShareItem:(ShareQRCodeView*)view forIndex:(NSInteger)idx;
 @end

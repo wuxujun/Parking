@@ -23,19 +23,21 @@
     // Do any additional setup after loading the view.
     imageView=[[UIImageView alloc]initWithFrame:self.view.bounds];
     [imageView setContentMode:UIViewContentModeScaleToFill];
+//    [imageView sizeToFit];
     
     [self.view addSubview:imageView];
     
     if (self.infoDict) {
         if ([self.infoDict objectForKey:@"url"]) {
-            
+            imageView.frame=CGRectMake(0, 0, self.view.frame.size.width, 180);
         }else{
             if ([[self.infoDict objectForKey:@"dataType"] isEqualToString:@"2"]) {
                 [imageView setImage:[UIImage imageNamed:@"intruduce_0"]];
             }else if ([[self.infoDict objectForKey:@"dataType"] isEqualToString:@"3"]) {
                 [imageView setImage:[UIImage imageNamed:[NSString stringWithFormat:@"%@/%@",[[AppConfig getInstance] getPhotoFilePath],[self.infoDict objectForKey:@"image"]]]];
-            }else{
-                [imageView setImage:[UIImage imageNamed:@"parking"]];
+            }else if([[self.infoDict objectForKey:@"dataType"] isEqualToString:@"1"]){
+                imageView.frame=CGRectMake(0, 0, self.view.frame.size.width, 180);
+                [imageView setImage:[UIImage imageNamed:[self.infoDict objectForKey:@"image"]]];
             }
         }
     }
@@ -72,6 +74,9 @@
                 [imageView setImage:[UIImage imageNamed:[self.infoDict objectForKey:@"image"]]];
             }else if ([[self.infoDict objectForKey:@"dataType"] isEqualToString:@"3"]) {
                [imageView setImage:[UIImage imageNamed:[NSString stringWithFormat:@"%@/%@",[[AppConfig getInstance] getPhotoFilePath],[self.infoDict objectForKey:@"image"]]]];
+            }else if([[self.infoDict objectForKey:@"dataType"] isEqualToString:@"1"]){
+                imageView.frame=CGRectMake(0, 0, self.view.frame.size.width, 180);
+                [imageView setImage:[UIImage imageNamed:[self.infoDict objectForKey:@"image"]]];
             }
         }
     }

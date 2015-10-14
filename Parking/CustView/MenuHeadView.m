@@ -48,7 +48,7 @@
     
     payIV=[[UIImageView alloc] init];
     [payIV setImage:[UIImage imageNamed:@"tab_menu_money"]];
-    [contentView addSubview:payIV];
+   
     
     payButton=[[UIButton alloc]init];
     [payButton setTag:1];
@@ -56,11 +56,10 @@
     [payButton.titleLabel setFont:[UIFont systemFontOfSize:14]];
     [payButton setTitleColor:[UIColor redColor] forState:UIControlStateHighlighted];
     [payButton addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-    [contentView addSubview:payButton];
     
     serverIV=[[UIImageView alloc] init];
     [serverIV setImage:[UIImage imageNamed:@"tab_menu_service"]];
-    [contentView addSubview:serverIV];
+    
     
     serverButton=[[UIButton alloc]init];
     [serverButton setTag:2];
@@ -68,11 +67,11 @@
     [serverButton.titleLabel setFont:[UIFont systemFontOfSize:14]];
     [serverButton setTitleColor:[UIColor redColor] forState:UIControlStateHighlighted];
     [serverButton addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-    [contentView addSubview:serverButton];
+    
     
     msgIV=[[UIImageView alloc] init];
     [msgIV setImage:[UIImage imageNamed:@"tab_menu_notice"]];
-    [contentView addSubview:msgIV];
+    
     
     msgButton=[[UIButton alloc]init];
     [msgButton setTag:3];
@@ -80,8 +79,16 @@
     [msgButton.titleLabel setFont:[UIFont systemFontOfSize:14]];
     [msgButton setTitleColor:[UIColor redColor] forState:UIControlStateHighlighted];
     [msgButton addTarget:self action:@selector(onButton:) forControlEvents:UIControlEventTouchUpInside];
-    [contentView addSubview:msgButton];
     
+    
+    if (APPSTORE_VERSION==0) {
+        [contentView addSubview:payIV];
+        [contentView addSubview:payButton];
+        [contentView addSubview:serverIV];
+        [contentView addSubview:serverButton];
+        [contentView addSubview:msgIV];
+        [contentView addSubview:msgButton];
+    }
     
     [self addSubview:contentView];
     [self reAdjustLayout];

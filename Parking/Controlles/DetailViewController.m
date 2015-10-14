@@ -63,7 +63,11 @@
     if ([[self.infoDict objectForKey:@"sourceType"] intValue]==1&&[[self.infoDict objectForKey:@"dataType"] intValue]==1) {
         [self loadDetail];
     }else{
-        [photoDatas addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"1",@"dataType", nil]];
+        if (self.dataType==2) {
+            [photoDatas addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"1",@"dataType",@"ic_bicycle",@"image", nil]];
+        }else{
+            [photoDatas addObject:[NSDictionary dictionaryWithObjectsAndKeys:@"1",@"dataType",@"parking",@"image", nil]];
+        }
         mHeadScrollView.numberOfPages=1;
     }
 }
@@ -110,8 +114,7 @@
         [dict setObject:[self.infoDict objectForKey:@"dataType"] forKey:@"dataType"];
         [dict setObject:[NSString stringWithFormat:@"%.0f",[[NSDate date] timeIntervalSince1970]] forKey:@"favTime"];
         [dict setObject:[self.infoDict objectForKey:@"poiId"] forKey:@"dataId"];
-        
-        HLog(@"%@",dict);
+    
         [[DBManager getInstance] insertOrUpdateCollect:dict];
         [self addRightFavoriteButton:YES action:@selector(onCollect:)];
     }
@@ -121,7 +124,7 @@
 {
     mHeadView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 180)];
     
-    mHeadScrollView=[[DMLazyScrollView alloc]initWithFrame:mHeadView.frame];
+    mHeadScrollView=[[DMLazyScrollView alloc] initWithFrame:mHeadView.frame];
     [mHeadScrollView setEnableCircularScroll:NO];
     [mHeadScrollView setAutoPlay:NO];
     mHeadScrollView.controlDelegate=self;

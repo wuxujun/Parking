@@ -149,6 +149,24 @@ static DBManager *sharedDBManager=nil;
     return [DBHelper queryAll:[PoiInfoEntity class] conditions:where params:@[]];
 }
 
+-(NSArray*)queryPoiInfo:(NSString *)charge forType:(NSString *)type forStatus:(NSString*)status
+{
+    NSMutableString * where =[[NSMutableString alloc] init];
+    [where appendString:@"WHERE 1=1 "];
+    if (![charge isEqualToString:@"0"]) {
+        [where appendFormat:@" and charge='%@' ",charge];
+    }
+    if (![type isEqualToString:@"0"]) {
+        [where appendFormat:@" and typeDes ='%@' ",type];
+    }
+    if (![status isEqualToString:@"0"]) {
+        [where appendFormat:@" and freeStatus='%@'",status];
+    }
+    [where appendString:@" order by distance"];
+    
+    return [DBHelper queryAll:[PoiInfoEntity class] conditions:where params:@[]];
+}
+
 -(BOOL)deleteAllPoiInfo
 {
     NSString* sql=@"DELETE FROM t_poi_info ";

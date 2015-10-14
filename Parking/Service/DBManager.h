@@ -25,6 +25,7 @@
 -(BOOL)insertOrUpdatePoiInfo:(NSDictionary *)info;
 -(NSArray*)queryPoiInfo;
 -(NSArray*)queryPoiInfo:(NSString*)charge forType:(NSString*)type;
+-(NSArray*)queryPoiInfo:(NSString*)charge forType:(NSString*)type forStatus:(NSString*)status;
 -(BOOL)deleteAllPoiInfo;
 
 @end

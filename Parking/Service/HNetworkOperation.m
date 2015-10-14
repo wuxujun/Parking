@@ -66,7 +66,7 @@
         jsonParams[@"linkCode"]=[[NSUserDefaults standardUserDefaults] objectForKey:APP_REQUEST_LINKCODE];
     }
     
-    DLog(@"%@ -- %@",aURLString,jsonParams);
+//    DLog(@"%@ -- %@",aURLString,jsonParams);
     return [super initWithURLString:aURLString params:jsonParams httpMethod:method];
 }
 
