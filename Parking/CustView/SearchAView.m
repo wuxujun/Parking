@@ -341,7 +341,7 @@
                     r=0;
                 }
                 NSDictionary * dc=[ds objectAtIndex:i];
-                HLog(@"%d  %d  %d  %@",(10+(w+5)*r),y,w,[dc objectForKey:@"title"]);
+//                HLog(@"%d  %d  %d  %@",(10+(w+5)*r),y,w,[dc objectForKey:@"title"]);
                 UIButton* btn=[[UIButton alloc]initWithFrame:CGRectMake(10+(w+5)*r, y, w, 32)];
                 btn.tag=[[dc objectForKey:@"id"] integerValue];
                 [btn.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];

@@ -126,10 +126,19 @@ static DBManager *sharedDBManager=nil;
     return count;
 }
 
+-(NSArray*)queryLocalPoiInfo
+{
+    return [DBHelper queryAll:[PoiInfoEntity class] conditions:@"WHERE sourceType=1 order by distance" params:@[]];
+}
 
 -(NSArray*)queryPoiInfo
 {
      return [DBHelper queryAll:[PoiInfoEntity class] conditions:@"WHERE 1=1 order by distance" params:@[]];
+}
+
+-(NSArray*)queryOtherCity
+{
+    return [DBHelper queryAll:[PoiInfoEntity class] conditions:@"WHERE sourceType=0 order by distance" params:@[]];
 }
 
 -(NSArray*)queryPoiInfo:(NSString *)charge forType:(NSString *)type
@@ -162,14 +171,43 @@ static DBManager *sharedDBManager=nil;
     if (![status isEqualToString:@"0"]) {
         [where appendFormat:@" and freeStatus='%@'",status];
     }
+    [where appendString:@" and distance>0 "];
     [where appendString:@" order by distance"];
     
     return [DBHelper queryAll:[PoiInfoEntity class] conditions:where params:@[]];
 }
 
--(BOOL)deleteAllPoiInfo
+-(NSArray*)queryPoiInfo:(NSString *)charge forType:(NSString *)type forStatus:(NSString*)status forLat:(NSString*)lat forLng:(NSString*)lng
 {
-    NSString* sql=@"DELETE FROM t_poi_info ";
+    NSMutableString * where =[[NSMutableString alloc] init];
+    [where appendString:@"WHERE 1=1 "];
+    if (![charge isEqualToString:@"0"]) {
+        [where appendFormat:@" and charge='%@' ",charge];
+    }
+    if (![type isEqualToString:@"0"]) {
+        [where appendFormat:@" and typeDes ='%@' ",type];
+    }
+    if (![status isEqualToString:@"0"]) {
+        [where appendFormat:@" and freeStatus='%@'",status];
+    }
+    [where appendFormat:@" and latitude>%.6f and latitude<%.6f ",([lat floatValue]-0.0045),([lat floatValue]+0.0045)];
+    [where appendFormat:@" and longitude>%.6f and longitude<%.6f ",([lng floatValue]-0.0052),([lng floatValue]+0.0052)];
+//    [where appendString:@"  limit 0,20 "];
+//    [where appendString:@" order by distance"];
+    HLog(@"%@",where);
+    return [DBHelper queryAll:[PoiInfoEntity class] conditions:where params:@[]];
+}
+
+-(BOOL)deletePoiInfo:(NSInteger)sType forDataType:(NSInteger)dType
+{
+    NSString* sql=[NSString stringWithFormat:@"DELETE FROM t_poi_info where sourceType=%d and dataType=%d ",sType,dType];
+//    sql=@"DELETE FROM t_poi_info ";
+    return [DBHelper excuteSql:sql withArguments:@[]];
+}
+
+-(BOOL)updatePoiInfoDistance
+{
+    NSString* sql=@"UPDATE t_poi_info SET distance=0  where sourceType=1 ";
     return [DBHelper excuteSql:sql withArguments:@[]];
 }
 

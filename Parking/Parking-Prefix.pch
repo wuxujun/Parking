@@ -17,7 +17,7 @@
     #import <OpenUDID.h>
 #endif
 
-#define APPSTORE_VERSION    1
+#define APPSTORE_VERSION    0
 
 #define DB_FILE_NAME  @"parking.sqlite"
 #define kAppId   @"606569eb-5dc8-43d7-935b-ccfa56f5ba4b"
@@ -33,6 +33,7 @@
 #define APP_REQUEST_USER_EMAIL      @"usermail"
 #define APP_REQUEST_USER_NICKNAME      @"nickname"
 #define APP_REQUEST_USER_MOBILE      @"mobile"
+#define CONF_NETWORK_TYPE            @"conf_network_type"
 
 #define CONF_LIST_TO_MAP            @"conf_list_to_map"
 #define CONF_MAP_TO_LIST            @"conf_map_to_list"
@@ -51,8 +52,10 @@
 #define APPKEY_QQ        @"hlHGgpZj5HYcxtMw"
 #define APPKEY_WEIXIN       @"wx6c6a544aea905eb1"
 #define APPSECRET_WEIXIN    @"7598047274a7c664ccef42e2879720c0"
-#define APPSHARE_CONTENT    @"欢迎使用金华智慧停车应用,http://www.i-carparking.com/ios/index.html"
-#define APPSHARE_URL        @"http://www.i-carparking.com/ios/index.html"
+//#define APPSHARE_CONTENT    @"欢迎使用金华智慧停车应用,http://www.i-carparking.com/ios/index.html"
+#define APPSHARE_CONTENT    @"欢迎使用金华智慧停车应用,http://www.i-carparking.com/app/index.html"
+//#define APPSHARE_URL        @"http://www.i-carparking.com/ios/index.html"
+#define APPSHARE_URL    @"http://www.i-carparking.com/app/index.html"
 
 //#define AMAP_KEY  @"7b28fb00ccbf0bd3bc4891e039921a24" //com.casic.parking
 #define AMAP_KEY  @"886872c044f8d74799a55ab080d62442" //com.hongkui.park

@@ -13,6 +13,7 @@
 #import "DBManager.h"
 #import "DBHelper.h"
 #import "SearchHisEntity.h"
+#import "MoreViewController.h"
 
 
 @interface SearchViewController()<UISearchDisplayDelegate,UISearchBarDelegate,UITableViewDelegate,UITableViewDataSource,SearchHeadViewDelegate>
@@ -45,13 +46,24 @@
     [self.searchBar setImage:[UIImage imageNamed:@"default_main_voice_icon_highlighted"] forSearchBarIcon:UISearchBarIconBookmark state:UIControlStateHighlighted];
     [[UIBarButtonItem appearanceWhenContainedIn:[UISearchBar class], nil] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor whiteColor],UITextAttributeTextColor,[NSValue valueWithUIOffset:UIOffsetMake(0, 1)],UITextAttributeTextShadowOffset,nil] forState:UIControlStateNormal];
     
+    for (UIView *view in self.searchBar.subviews) {
+        // for before iOS7.0
+        if ([view isKindOfClass:NSClassFromString(@"UISearchBarBackground")]) {
+            [view removeFromSuperview];
+            break;
+        }
+        // for later iOS7.0(include)
+        if ([view isKindOfClass:NSClassFromString(@"UIView")] && view.subviews.count > 0) {
+            [[view.subviews objectAtIndex:0] removeFromSuperview];
+            break;
+        }
+    }
+    
     [self.searchBar setShowsBookmarkButton:YES];
     self.searchController=[[UISearchDisplayController alloc]initWithSearchBar:self.searchBar contentsController:self];
     [self.searchController setDelegate:self];
     [self.searchController setSearchResultsDataSource:self];
     self.navigationItem.titleView=self.searchController.searchBar;
-    
-    HLog(@"---->%f",self.searchController.searchBar.bounds.size.width);
 
     _tableView.separatorStyle=UITableViewCellSeparatorStyleSingleLine;
     
@@ -67,6 +79,7 @@
     }
 }
 
+
 -(void)onSearch
 {
     NSString* key=self.searchBar.text;
@@ -74,11 +87,15 @@
         [self alertRequestResult:@"请输入搜索关键字"];
         return;
     }
-    SearchMapViewController* dController=[[SearchMapViewController alloc]init];
-    dController.searchKeyword=self.searchBar.text;
-    dController.startPoint=self.startPoint;
-    dController.cityCode=self.cityCode;
-    [self.navigationController pushViewController:dController animated:YES];
+//    SearchMapViewController* dController=[[SearchMapViewController alloc]init];
+//    dController.searchKeyword=self.searchBar.text;
+//    dController.startPoint=self.startPoint;
+//    dController.cityCode=self.cityCode;
+//    [self.navigationController pushViewController:dController animated:YES];
+    
+    NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:self.searchBar.text,@"title",@"4",@"dataType",[NSString stringWithFormat:@"%@",self.cityCode],@"cityCode", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SEARCH_KEYWORK object:dict];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)onVoice
@@ -300,8 +317,8 @@
     for (UIView *subView in viewTop.subviews) {
         if ([subView isKindOfClass:NSClassFromString(classString)]) {
             UIButton *cancelButton = (UIButton*)subView;
-//            [cancelButton setTitle:@"搜索" forState:UIControlStateNormal];
-            [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
+            [cancelButton setTitle:@"搜索" forState:UIControlStateNormal];
+//            [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
         }
     }
 }
@@ -314,7 +331,7 @@
 {
     HLog(@"%@",searchBar.text);
     
-//    [self onSearch];
+    [self onSearch];
 }
 
 -(void)searchBarBookmarkButtonClicked:(UISearchBar *)searchBar
@@ -328,8 +345,8 @@
     self.searchBar.text=key;
 //    [self.searchDisplayController setActive:NO animated:NO];
 //    self.searchBar.placeholder=key;
-    [self searchTipsWithKey:key];
-//    [self onSearch];
+//    [self searchTipsWithKey:key];
+    [self onSearch];
 }
 
 #pragma mark - SearchHeadViewDelegate
@@ -355,9 +372,13 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SEARCH_KEYWORK object:dict];
     }
     [self.navigationController popViewControllerAnimated:YES];
-    
 }
 
+-(void)onSearchHeadViewMore:(SearchHeadView *)view
+{
+    MoreViewController* dController=[[MoreViewController alloc]init];
+    [self.navigationController pushViewController:dController animated:YES];
+}
 
 #pragma mark - IFlyRecognizerViewDelegate
 -(void)onResult:(NSArray *)resultArray isLast:(BOOL)isLast

@@ -31,12 +31,20 @@
         [self.view addSubview:mWebView];
     }
     if (self.infoDict) {
-        if ([self.infoDict objectForKey:@"noticeTitle"]) {
-            [self setCenterTitle:[self.infoDict objectForKey:@"noticeTitle"]];
-        }
-        if ([self.infoDict objectForKey:@"noticeLink"]) {
-            
-            [mWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[self.infoDict objectForKey:@"noticeLink"]]]];
+        if ([self.infoDict objectForKey:@"dataType"]) {
+            if ([self.infoDict objectForKey:@"title"]) {
+                [self setCenterTitle:[self.infoDict objectForKey:@"title"]];
+            }
+            if ([self.infoDict objectForKey:@"webUrl"]) {
+                [mWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[self.infoDict objectForKey:@"webUrl"]]]];
+            }
+        }else{
+            if ([self.infoDict objectForKey:@"noticeTitle"]) {
+                [self setCenterTitle:[self.infoDict objectForKey:@"noticeTitle"]];
+            }
+            if ([self.infoDict objectForKey:@"noticeLink"]) {
+                [mWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[self.infoDict objectForKey:@"noticeLink"]]]];
+            }
         }
     }
     

@@ -14,6 +14,9 @@
 #import "HNetworkEngine.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate,REFrostedViewControllerDelegate>
+{
+    NSTimer                     *timer;
+}
 
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) UIViewController*     rootViewController;
@@ -21,6 +24,7 @@
 
 @property(nonatomic,strong)IFlyDataUploader         *iflyDataUploader;
 @property(nonatomic,strong)HNetworkEngine           *networkEngine;
+@property(nonatomic,strong)NSString*                region;
 
 @property (nonatomic,strong)id<GAITracker>    tracker;
 

@@ -24,8 +24,13 @@
 
 -(BOOL)insertOrUpdatePoiInfo:(NSDictionary *)info;
 -(NSArray*)queryPoiInfo;
+-(NSArray*)queryLocalPoiInfo;
+-(NSArray*)queryOtherCity;
 -(NSArray*)queryPoiInfo:(NSString*)charge forType:(NSString*)type;
 -(NSArray*)queryPoiInfo:(NSString*)charge forType:(NSString*)type forStatus:(NSString*)status;
--(BOOL)deleteAllPoiInfo;
+-(NSArray*)queryPoiInfo:(NSString *)charge forType:(NSString *)type forStatus:(NSString*)status forLat:(NSString*)lat forLng:(NSString*)lng;
+
+-(BOOL)deletePoiInfo:(NSInteger)sType forDataType:(NSInteger)dType;
+-(BOOL)updatePoiInfoDistance;
 
 @end

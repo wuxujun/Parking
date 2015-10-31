@@ -207,8 +207,14 @@
 -(IBAction)onButton:(id)sender
 {
     UIButton* btn=(UIButton*)sender;
-    if ([delegate respondsToSelector:@selector(onSearchHeadViewClicked:)]) {
-        [delegate onSearchHeadViewClicked:btn.titleLabel.text];
+    if (btn.tag==18) {
+        if ([delegate respondsToSelector:@selector(onSearchHeadViewMore:)]) {
+            [delegate onSearchHeadViewMore:self];
+        }
+    }else{
+        if ([delegate respondsToSelector:@selector(onSearchHeadViewClicked:)]) {
+            [delegate onSearchHeadViewClicked:btn.titleLabel.text];
+        }
     }
 }
 -(void)rotate:(UIInterfaceOrientation)interfaceOrientation animation:(BOOL)animation

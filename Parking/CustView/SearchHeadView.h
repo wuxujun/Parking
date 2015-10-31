@@ -51,4 +51,5 @@
 @protocol SearchHeadViewDelegate <NSObject>
 
 -(void)onSearchHeadViewClicked:(NSString*)keyworkd;
+-(void)onSearchHeadViewMore:(SearchHeadView*)view;
 @end

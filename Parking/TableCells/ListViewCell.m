@@ -10,6 +10,7 @@
 #import "UserDefaultHelper.h"
 #import "StringUtil.h"
 #import <AMapNaviKit/MAMapKit.h>
+#import "UIImageView+AFNetworking.h"
 
 
 @implementation ListViewCell
@@ -161,6 +162,7 @@
         if ([self.infoDict objectForKey:@"address"]) {
             [addressLabel setText:[NSString stringWithFormat:@"%@",[self.infoDict objectForKey:@"address"]]];
         }
+        [iconIV setImage:[UIImage imageNamed:@"ic_bus"]];
     }else{
         if ([self.infoDict objectForKey:@"address"]) {
             [addressLabel setText:[NSString stringWithFormat:@"地址:%@",[self.infoDict objectForKey:@"address"]]];
@@ -182,11 +184,23 @@
             [distanceLabel setText:[NSString stringWithFormat:@"%@",[NSString caleDistance:[[self.infoDict objectForKey:@"distance"]integerValue]]]];
         }
 //    }
+    
+    if (self.dataType==2) {
+        [iconIV setImage:[UIImage imageNamed:@"ic_bicycle"]];
+    }
     if(sourceType==1&&dType==2){
         [priceLabel setHidden:YES];
     }
     if(sourceType==0){
         [priceLabel setHidden:YES];
+    }
+    if (self.dataType==1&&sourceType==1) {
+        NSString * thumbUrl=[self.infoDict objectForKey:@"thumbUrl"];
+        if (thumbUrl==(id)[NSNull null]||thumbUrl.length==0) {
+            
+        }else{
+            [iconIV setImageWithURL:[NSURL URLWithString:[self.infoDict objectForKey:@"thumbUrl"]] placeholderImage:[UIImage imageNamed:@"parking"]];
+        }
     }
 }
 

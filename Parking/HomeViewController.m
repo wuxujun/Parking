@@ -7,6 +7,7 @@
 //
 
 #import "HomeViewController.h"
+#import "UIViewController+NavigationBarButton.h"
 #import "UIViewController+KeyboardAnimation.h"
 #import "AppDelegate.h"
 #import "iflyMSC/IFlySpeechConstant.h"
@@ -26,6 +27,7 @@
 #import "PayViewController.h"
 #import "ServiceViewController.h"
 #import "PointViewController.h"
+#import "WebViewController.h"
 
 #import "CustPOIAnnotation.h"
 #import "POIAnnotation.h"
@@ -68,7 +70,7 @@
 #import "MBProgressHUD.h"
 #import "UIView+LoadingView.h"
 
-@interface HomeViewController ()<CLLocationManagerDelegate,DMLazyScrollViewDelegate,HomeInfoViewControllerDelegate,CustLayerPopupDelegate,SubmitLayerPopupDelegate,ShareQRCodeViewDelegate,UMSocialUIDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,SelectViewPopupDelegate>
+@interface HomeViewController ()<CLLocationManagerDelegate,DMLazyScrollViewDelegate,HomeInfoViewControllerDelegate,CustLayerPopupDelegate,SubmitLayerPopupDelegate,ShareQRCodeViewDelegate,UMSocialUIDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,SelectViewPopupDelegate,UISearchBarDelegate>
 {
     CLLocationManager   *locManager;
     MBProgressHUD       *loadingHUD;
@@ -89,14 +91,15 @@
     UIButton        * btnZoomMin;
     
     
-    UIButton        * btnVoice;
-    UIButton        * btnSearch;
-    UIView          * mFooterView;
+    UIButton            * btnVoice;
+    UISearchBar         * searchBar;
+    UIView              * mFooterView;
     DMLazyScrollView    *mFooterScrollView;
     NSMutableArray      *viewControllerArray;
     
     NSMutableArray      *data;
     NSMutableArray      *keyPois;
+    NSMutableArray      *advPois;
     NSString            *currentSearchKeyword;
     BOOL                locationFinished;
     BOOL                searchKeyword;
@@ -112,11 +115,10 @@
     
     AMapGeoPoint        *lastAMapGeoPoint;
     
-    int                 dataTypeLayer;
+    int                 dataTypeLayer;   //0 目地的 1 停车场 2 公共自行车 3 公交站  4 高级搜索
     NSInteger           sourceType;
     NSInteger           currentPage;
     NSInteger           maxCount;
-    
     
     NSString        *fileName;
     NSString        *filePath;
@@ -142,6 +144,7 @@
     [super viewDidLoad];
     data=[[NSMutableArray alloc] init];
     keyPois=[[NSMutableArray alloc]init];
+    advPois=[[NSMutableArray alloc]init];
     viewControllerArray=[[NSMutableArray alloc] initWithCapacity:10];
     for (NSUInteger k=0 ; k<10; ++k) {
         [viewControllerArray addObject:[NSNull null]];
@@ -181,24 +184,28 @@
     
 	// Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.rightBarButtonItem=[[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"default_common_list_icon_normal"] style:UIBarButtonItemStylePlain target:self action:@selector(showList:)];
-    self.navigationItem.leftBarButtonItem=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"nav_menu_icon"] style:UIBarButtonItemStylePlain target:(CustNavigationController*)self.navigationController action:@selector(showMenu)];
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.adjustsImageWhenHighlighted = NO;
+    button.frame = CGRectMake(0, 0, 44.0f, 44.0f);
+    [button setImage:[UIImage imageNamed:@"nav_menu_icon"] forState:UIControlStateNormal];
+//    [self adjustButtonForiOS7:button left:YES];
+    [button addTarget:(CustNavigationController*)self.navigationController action:@selector(showMenu) forControlEvents:UIControlEventTouchUpInside];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:button];
+    
+//    self.navigationItem.leftBarButtonItem=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"nav_menu_icon"] style:UIBarButtonItemStylePlain target:(CustNavigationController*)self.navigationController action:@selector(showMenu)];
     
     self.searchAPI=[[AMapSearchAPI alloc]initWithSearchKey:AMAP_KEY Delegate:self];
-    
-    
+    dataTypeLayer=[[UserDefaultHelper objectForKey:CONF_CURRENT_LAYER_TYPE] intValue];
     [self configMapView];
-    
     [self initMapViewTool];
     [self initCenterSearch];
     [self initFooterView];
-    
-
 }
 
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    dataTypeLayer=[[UserDefaultHelper objectForKey:CONF_CURRENT_LAYER_TYPE] intValue];
     [self resetMapButton];
 }
 
@@ -219,47 +226,120 @@
     [self loadLocalData];
 }
 
+-(void)loadAdvSearchData
+{
+    NSMutableArray* poiAnnotations=[NSMutableArray arrayWithCapacity:advPois.count];
+    for (int i=0; i<[advPois count]; i++) {
+        [poiAnnotations addObject:[[POIAnnotation alloc] initWithPOI:[advPois objectAtIndex:i] forType:4 index:i isSelected:NO]];
+    }
+    [self.mapView addAnnotations:poiAnnotations];
+}
+
 -(void)loadLocalData
 {
     int mapToList=[[UserDefaultHelper objectForKey:CONF_MAP_TO_LIST] intValue];
     int listToMap=[[UserDefaultHelper objectForKey:CONF_LIST_TO_MAP] intValue];
     if (mapToList==1||listToMap==1) {
-        [self readDBData];
+        NSString* lat=[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE];
+        NSString* lng=[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE];
+        [self readDBData:lat forLng:lng];
     }
 }
 
--(void)readDBData
+-(void)readLocalDB
 {
+    NSString* lat=[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE];
+    NSString* lng=[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE];
+    [self readDBData:lat forLng:lng];
+}
+
+-(void)readDBData:(NSString*)lat forLng:(NSString*)lng
+{
+    NSDateFormatter* formater=[[NSDateFormatter alloc]init];
+    formater.dateFormat=@"mm-dd HH:mm:ss SSS";
+    HLog(@"---begin ---->%@",[NSString currentTime:formater]);
+    
+    bLoading=NO;
     [data removeAllObjects];
     [self clearAllAnnotationPOI];
     NSMutableArray* poiAnnotations=[[NSMutableArray alloc] init];
-    NSArray* array=[[DBManager getInstance] queryPoiInfo:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_CHARGE] forType:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_TYPE] forStatus:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_STATUS]];
-    if ([array count]>0) {
-        int idx=0;
-        for (PoiInfoEntity *entity in array) {
-            
-            NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%d",entity.distance],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",[NSString stringWithFormat:@"%d",(idx+1)],@"idx",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode",entity.freeStatus,@"freeStatus", nil];
-//            HLog(@"%d   ===> %d   %@   %@   %d   %@ <==> %@",entity.idx,idx,entity.poiId,entity.title,entity.distance,entity.latitude,entity.longitude);
-            [data addObject:dict];
-            if (entity.sourceType==0) {
-                [poiAnnotations addObject:[[POIAnnotation alloc] initWithPoiInfoEntity:entity index:idx isSelected:NO]];
-            }else{
-                [poiAnnotations addObject:[[CustPOIAnnotation alloc] initWithDictionary:dict index:idx isSelected:NO]];
+    NSArray* array;
+    if ([currentCityCode isEqualToString:@"0579"]) {
+        array=[[DBManager getInstance] queryPoiInfo:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_CHARGE] forType:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_TYPE] forStatus:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_STATUS] forLat:lat forLng:lng];
+        if ([array count]>0) {
+            int idx=0;
+            HLog(@"---1 ---->%@",[NSString currentTime:formater]);
+            NSMutableArray  *localDatas=[[NSMutableArray alloc]init];
+            for (PoiInfoEntity *entity in array) {
+                NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%@",[self caclDistanceForEntity:entity]],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode",entity.freeStatus,@"freeStatus",entity.shopHours,@"shopHours",entity.thumbUrl,@"thumbUrl", nil];
+                [localDatas addObject:dict];
             }
-            idx++;
-        }
+        //排序
+            NSArray* pois=[localDatas sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+                NSDictionary* p1=(NSDictionary*)obj1;
+                NSDictionary* p2=(NSDictionary*)obj2;
+                if ([[p1 objectForKey:@"distance"] integerValue]<[[p2 objectForKey:@"distance"] integerValue]) {
+                    return NSOrderedAscending;
+                }else if([[p1 objectForKey:@"distance"] integerValue]>[[p2 objectForKey:@"distance"] integerValue]){
+                    return NSOrderedDescending;
+                }else{
+                    return NSOrderedSame;
+                }
+            }];
+        //重置序号
+            for (NSDictionary *entity in pois) {
+                NSMutableDictionary* dict=[NSMutableDictionary dictionaryWithDictionary:entity];
+                [dict setObject:[NSString stringWithFormat:@"%d",(idx+1)] forKey:@"idx"];
+//                HLog(@"%@",dict);
+                [data addObject:dict];
+                [poiAnnotations addObject:[[CustPOIAnnotation alloc] initWithDictionary:dict index:idx isSelected:NO]];
+                idx++;
+            }
+            HLog(@"---2 ---->%@",[NSString currentTime:formater]);
+    
+            [self.mapView addAnnotations:poiAnnotations];
+            if (bFirstOrTarget) {
+                bMoveing=YES;
+                [self.mapView showAnnotations:poiAnnotations animated:bFirstOrTarget];
+                bMoveing=YES;
+            }
+            bFirstOrTarget=NO;
+            [self reloadFooterData];
+            HLog(@"---4 ---->%@     ---->%d",[NSString currentTime:formater],[pois count]);
         
-        [self.mapView addAnnotations:poiAnnotations];
-        if (bFirstOrTarget) {
-            bMoveing=YES;
-            [self.mapView showAnnotations:poiAnnotations animated:bFirstOrTarget];
-            bMoveing=YES;
+        }else{
+            [self showTipsForCenter:@"无数据"];
+            if (loadingHUD) {
+                [loadingHUD hide:YES];
+            }
+//        bLoading=YES;
+//        [self serarchForMapCenter:[AMapGeoPoint locationWithLatitude:self.mapView.centerCoordinate.latitude longitude:self.mapView.centerCoordinate.longitude]];
         }
-        bFirstOrTarget=NO;
-        [self reloadFooterData];
     }else{
-        bLoading=YES;
-        [self serarchForMapCenter:[AMapGeoPoint locationWithLatitude:self.mapView.centerCoordinate.latitude longitude:self.mapView.centerCoordinate.longitude]];
+        //其他城市数据
+        array=[[DBManager getInstance] queryOtherCity];
+        if ([array count]>0) {
+            int idx=0;
+            for (PoiInfoEntity *entity in array) {
+                NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%d",entity.distance],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",[NSString stringWithFormat:@"%d",(idx+1)],@"idx",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode",entity.freeStatus,@"freeStatus",entity.shopHours,@"shopHours",entity.thumbUrl,@"thumbUrl", nil];
+                [data addObject:dict];
+                if (entity.sourceType==0) {
+                    [poiAnnotations addObject:[[POIAnnotation alloc] initWithPoiInfoEntity:entity forType:entity.dataType index:idx isSelected:NO]];
+                }else{
+                    [poiAnnotations addObject:[[CustPOIAnnotation alloc] initWithDictionary:dict index:idx isSelected:NO]];
+                }
+                
+            }
+            
+            [self.mapView addAnnotations:poiAnnotations];
+            if (bFirstOrTarget) {
+                bMoveing=YES;
+                [self.mapView showAnnotations:poiAnnotations animated:bFirstOrTarget];
+                bMoveing=YES;
+            }
+            bFirstOrTarget=NO;
+            [self reloadFooterData];
+        }
     }
 }
 
@@ -285,7 +365,6 @@
     }else{
         [self.iFlySpeechSynthesizer setParameter:@"xiaoyan" forKey:[IFlySpeechConstant VOICE_NAME]];
     }
-    
 }
 
 - (void)didReceiveMemoryWarning
@@ -301,6 +380,7 @@
     self.mapView.frame =CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
     [self.view insertSubview:self.mapView atIndex:0];
     self.mapView.showsUserLocation = YES;
+//    [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(29.079060f, 119.647446f) animated:YES];
 }
 
 -(void)initFooterView
@@ -383,29 +463,28 @@
 
 -(void)initCenterSearch
 {
-    UIView* center=[[UIView alloc]initWithFrame:CGRectMake(60, 6, self.view.frame.size.width-120, 32)];
-    [center setBackgroundColor:[UIColor whiteColor]];
-    [center.layer setBorderColor:[[UIColor grayColor] CGColor] ];
-    [center.layer setBorderWidth:0.5f];
-    [center.layer setMasksToBounds:YES];
-    [center.layer setCornerRadius:4.0f ];
+    searchBar=[[UISearchBar alloc]init];
+    searchBar.delegate=self;
+    [searchBar setPlaceholder:@"搜索目的地"];
+    [searchBar setImage:[UIImage imageNamed:@"default_main_voice_icon_normal"] forSearchBarIcon:UISearchBarIconBookmark state:UIControlStateNormal];
+    [searchBar setImage:[UIImage imageNamed:@"default_main_voice_icon_highlighted"] forSearchBarIcon:UISearchBarIconBookmark state:UIControlStateHighlighted];
+    [[UIBarButtonItem appearanceWhenContainedIn:[UISearchBar class], nil] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor whiteColor],UITextAttributeTextColor,[NSValue valueWithUIOffset:UIOffsetMake(0, 1)],UITextAttributeTextShadowOffset,nil] forState:UIControlStateNormal];
+    [searchBar setShowsBookmarkButton:YES];
     
-    btnSearch=[[UIButton alloc]initWithFrame:CGRectMake(0, 0, center.frame.size.width-40, center.frame.size.height)];
-    [btnSearch.titleLabel setFont:[UIFont systemFontOfSize:14.0]];
-    [btnSearch setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-    [btnSearch setTitle:@"搜索目的地" forState:UIControlStateNormal];
-    UIImageView* searchIV=[[UIImageView alloc]initWithFrame:CGRectMake(5, 5, 22, 22)];
-    [searchIV setImage:[UIImage imageNamed:@"default_main_search_icon_normal"]];
-    [btnSearch addSubview:searchIV];
-    [btnSearch addTarget:self action:@selector(search:) forControlEvents:UIControlEventTouchUpInside];
-    [center addSubview:btnSearch];
+    for (UIView *view in searchBar.subviews) {
+        // for before iOS7.0
+        if ([view isKindOfClass:NSClassFromString(@"UISearchBarBackground")]) {
+            [view removeFromSuperview];
+            break;
+        }
+        // for later iOS7.0(include)
+        if ([view isKindOfClass:NSClassFromString(@"UIView")] && view.subviews.count > 0) {
+            [[view.subviews objectAtIndex:0] removeFromSuperview];
+            break;
+        }
+    }
     
-    btnVoice=[[UIButton alloc]initWithFrame:CGRectMake(center.frame.size.width-50, 0, 40, 32)];
-    [btnVoice setImage:[UIImage imageNamed:@"default_main_voice_icon_normal"] forState:UIControlStateNormal];
-    [btnVoice setImage:[UIImage imageNamed:@"default_main_voice_icon_highlighted"] forState:UIControlStateHighlighted];
-    [btnVoice addTarget:self action:@selector(voice:) forControlEvents:UIControlEventTouchUpInside];
-    [center addSubview:btnVoice];
-    self.navigationItem.titleView=center;
+    self.navigationItem.titleView=searchBar;
 }
 
 -(IBAction)voice:(id)sender
@@ -686,16 +765,6 @@
     [self.navigationController pushViewController:dController animated:YES];
 }
 
--(IBAction)search:(id)sender
-{
-    [UserDefaultHelper setObject:@"0" forKey:CONF_MAP_TO_LIST];
-    [UserDefaultHelper setObject:@"0" forKey:CONF_LIST_TO_MAP];
-    SearchViewController *dController=[[SearchViewController alloc]init];
-    dController.searchType=0;
-    dController.cityCode=currentCityCode;
-    [dController setStartPoint:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%f",currentLatitude],@"latitude",[NSString stringWithFormat:@"%f",currentLongitude],@"longitude", nil]];
-    [self.navigationController pushViewController:dController animated:YES];
-}
 
 -(UIViewController*)controllerAtIndex:(NSInteger)index
 {
@@ -730,7 +799,7 @@
 {
     
     NSMutableString *msg=[[NSMutableString alloc]init];
-    [msg appendString:@"为您推荐附近停车场"];
+//    [msg appendString:@"为您推荐附近停车场"];
     [msg appendFormat:@"%@",[dict objectForKey:@"title"]];
 //    NSString* addr=[dict objectForKey:@"address"];
 //    if (addr==(id)[NSNull null]||addr.length==0) {
@@ -797,6 +866,7 @@
     if([[self.mapView overlays] count]>0){
         [self.mapView removeOverlays:[self.mapView overlays]];
     }
+    
     
 //    for (UIView* view in mFooterScrollView.subviews) {
 //        if ([view isKindOfClass:[HomeInfoView class]]) {
@@ -979,7 +1049,7 @@
             if (!locationFinished) {
                 locationFinished=YES;
                 bFirstOrTarget=YES;
-                [self searchForKeyword:[NSDictionary dictionaryWithObjectsAndKeys:@"停车场",@"title",@"1",@"dataType", nil]];
+                [self searchForKeyword:[NSDictionary dictionaryWithObjectsAndKeys:@"停车场",@"title",@"1",@"dataType",@"0",@"point", nil]];
                 [self searchForGeo];
             }
             [UserDefaultHelper setObject:[NSNumber numberWithDouble:currentLatitude] forKey:CONF_LOCATION_LATITUDE];
@@ -997,10 +1067,16 @@
     id<MAAnnotation> annotation=view.annotation;
     if ([annotation isKindOfClass:[POIAnnotation class]]) {
         POIAnnotation* poi=(POIAnnotation*)annotation;
-        
 //        [self selectPOIAnnotationForIndex:poi.index];
-        if ([data count]>0) {
-            [mFooterScrollView setPage:poi.index animated:YES];
+        if (poi.dataType==4) {
+            if (poi.poi) {
+                dataTypeLayer=4;
+                [self searchForAMapPOI:poi.poi];
+            }
+        }else{
+            if ([data count]>0) {
+                [mFooterScrollView setPage:poi.index animated:YES];
+            }
         }
     }else if ([annotation isKindOfClass:[CustPOIAnnotation class]]) {
         CustPOIAnnotation* poi=(CustPOIAnnotation*)annotation;
@@ -1033,30 +1109,35 @@
         if (anView==nil) {
             anView=[[MAPinAnnotationView alloc]initWithAnnotation:annotation reuseIdentifier:uLocation];
         }
-        NSString *img=@"ic_parking";
-        if (dataTypeLayer==2) {
-            img=@"ic_bicycle_blue";
-        }else if(dataTypeLayer==3){
-            img=@"ic_bus_blue";
-        }
-        if (poi.isSelected) {
-            img=@"ic_parking_s2";
+        if (poi.dataType<4) {
+            NSString *img=@"ic_parking";
             if (dataTypeLayer==2) {
-                img=@"ic_bicycle_blue_s2";
+                img=@"ic_bicycle_blue";
             }else if(dataTypeLayer==3){
-                img=@"ic_bus_blue_s2";
+                img=@"ic_bus_blue";
+            }
+            if (poi.isSelected) {
+                img=@"ic_parking_s2";
+                if (dataTypeLayer==2) {
+                    img=@"ic_bicycle_blue_s2";
+                }else if(dataTypeLayer==3){
+                    img=@"ic_bus_blue_s2";
+                }
+            }
+            anView.image=[UIImage imageNamed:img];
+            if (poi.isSelected) {
+                CGRect frame=anView.frame;
+                frame.size.width=frame.size.width*1.5;
+                frame.size.height=frame.size.height*1.5;
+                anView.frame=frame;
+                [anView setContentMode:UIViewContentModeScaleToFill];
+            }
+            anView.centerOffset=CGPointMake(0, -18);
+        }else{
+            if(poi.isSelected){
+                anView.highlighted=YES;
             }
         }
-
-        anView.image=[UIImage imageNamed:img];
-        if (poi.isSelected) {
-            CGRect frame=anView.frame;
-            frame.size.width=frame.size.width*1.5;
-            frame.size.height=frame.size.height*1.5;
-            anView.frame=frame;
-            [anView setContentMode:UIViewContentModeScaleToFill];
-        }
-        anView.centerOffset=CGPointMake(0, -18);
         return anView;
     }
     if ([annotation isKindOfClass:[CustPOIAnnotation class]]) {
@@ -1073,7 +1154,6 @@
         }
         NSString* status=[poi.dict objectForKey:@"freeStatus"];
         img=[[AppConfig getInstance] getMapIcon:dataTypeLayer isSelect:poi.isSelected fee:price status:status];
-//        HLog(@"%@  ==>%@",poi.dict,img);
         anView.image=[UIImage imageNamed:img];
         if (poi.isSelected) {
             [anView setHighlighted:YES];
@@ -1131,13 +1211,13 @@
     MAMapPoint  point1=MAMapPointForCoordinate(CLLocationCoordinate2DMake(lastAMapGeoPoint.latitude, lastAMapGeoPoint.longitude));
     MAMapPoint  point2=MAMapPointForCoordinate(mapView.centerCoordinate);
     CLLocationDistance distance=MAMetersBetweenMapPoints(point1, point2);
-//    [self searchForGeo:[AMapGeoPoint locationWithLatitude:mapView.centerCoordinate.latitude longitude:mapView.centerCoordinate.longitude]];
+    [self searchForGeo:[AMapGeoPoint locationWithLatitude:mapView.centerCoordinate.latitude longitude:mapView.centerCoordinate.longitude]];
 //    HLog(@"......%.6f   %.6f  %d    %d",mapView.centerCoordinate.latitude,mapView.centerCoordinate.longitude,bMoveing,distance);
     BOOL isShow=[[[NSUserDefaults standardUserDefaults] objectForKey:CONF_PARKING_MOVE_SHOW] boolValue];
     if (distance>100&&isShow&&locationFinished&&!bMoveing) {
-        if (!bLoading) {
-            [self serarchForMapCenter:[AMapGeoPoint locationWithLatitude:mapView.centerCoordinate.latitude longitude:mapView.centerCoordinate.longitude]];
+        if (!bLoading&&dataTypeLayer!=4) {
             bLoading=YES;
+            [self serarchForMapCenter:[AMapGeoPoint locationWithLatitude:mapView.centerCoordinate.latitude longitude:mapView.centerCoordinate.longitude]];
         }
         lastAMapGeoPoint=[AMapGeoPoint locationWithLatitude:mapView.centerCoordinate.latitude longitude:mapView.centerCoordinate.longitude];
     }
@@ -1159,15 +1239,20 @@
         return;
     }
     [data removeAllObjects];
+    if (dataTypeLayer==4) {
+        [advPois removeAllObjects];
+    }
     NSMutableArray* poiAnnotations=[NSMutableArray arrayWithCapacity:response.pois.count];
     [response.pois enumerateObjectsUsingBlock:^(AMapPOI* p,NSUInteger idx,BOOL *stop){
-        
-            NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:p.name,@"title",p.uid,@"poiId",p.type,@"typeDes",p.address,@"address",[NSNumber numberWithInteger:p.distance],@"distance",[NSString stringWithFormat:@"%f",p.location.latitude],@"latitude",[NSString stringWithFormat:@"%f",p.location.longitude],@"longitude",@"0",@"dataType",[NSString stringWithFormat:@"%d",(idx+1)],@"idx",p.citycode,@"cityCode",p.adcode,@"adCode",@"0",@"totalCount",@"0",@"freeCount",@"0",@"freeStatus",@"0",@"chargeDetail",@"0",@"charge",@"0",@"price",@"0",@"sourceType", nil];
+        if (dataTypeLayer==4) {
+            [advPois addObject:p];
+        }
+        NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:p.name,@"title",p.uid,@"poiId",p.type,@"typeDes",p.address,@"address",[NSNumber numberWithInteger:p.distance],@"distance",[NSString stringWithFormat:@"%f",p.location.latitude],@"latitude",[NSString stringWithFormat:@"%f",p.location.longitude],@"longitude",[NSString stringWithFormat:@"%d",dataTypeLayer],@"dataType",[NSString stringWithFormat:@"%d",(idx+1)],@"idx",p.citycode,@"cityCode",p.adcode,@"adCode",@"0",@"totalCount",@"0",@"freeCount",@"0",@"freeStatus",@"0",@"chargeDetail",@"0",@"charge",@"0",@"price",@"0",@"sourceType",@"0",@"shopHours",@"0",@"thumbUrl",@"0",@"parkRiveType", nil];
             [data addObject:dict];
         if (searchKeyword) {
             [poiAnnotations addObject:[[TPOIAnnotation alloc] initWithPOI:p index:idx isSelected:NO]];
         }else{
-            [poiAnnotations addObject:[[POIAnnotation alloc] initWithPOI:p index:idx isSelected:NO]];
+            [poiAnnotations addObject:[[POIAnnotation alloc] initWithPOI:p forType:dataTypeLayer index:idx isSelected:NO]];
         }
     }];
     sourceType=0;
@@ -1187,14 +1272,16 @@
     BOOL isVoice=[[UserDefaultHelper objectForKey:PRE_VOICE] boolValue];
     if (response.regeocode) {
         if (bQueryGeo) {
-            currentCityCode=response.regeocode.addressComponent.citycode;
-            currentAdCode=response.regeocode.addressComponent.adcode;
+            if (dataTypeLayer==4) {
+                currentCityCode=response.regeocode.addressComponent.citycode;
+                currentAdCode=response.regeocode.addressComponent.adcode;
+            }
         }else{
             currentAddress=[NSString stringWithFormat:@"%@",response.regeocode.formattedAddress];
             currentCityCode=response.regeocode.addressComponent.citycode;
             if ([data count]>0&&!bFirstVoice&&dataTypeLayer==1&&currentAddress.length>0&&isVoice) {
                 NSDictionary* dic=[data objectAtIndex:0];
-                NSString* msg=[NSString stringWithFormat:@"您当前所在位置:%@,为您推荐附近停车场 %@ 地址 %@",currentAddress,[dic objectForKey:@"title"],[dic objectForKey:@"address"]];
+                NSString* msg=[NSString stringWithFormat:@"您当前所在位置:%@,%@ 地址 %@",currentAddress,[dic objectForKey:@"title"],[dic objectForKey:@"address"]];
                 [self playSpeechForMsg:msg];
                 bFirstVoice=YES;
             }
@@ -1236,7 +1323,7 @@
     [self.networkEngine postOperationWithURLString:requestUrl params:params success:^(MKNetworkOperation *completedOperation, id result) {
         bLoading=NO;
 //        HLog(@"%@",result);
-        HLog(@"%@",[NSString currentTime:formater]);
+//        HLog(@"%@",[NSString currentTime:formater]);
         if([[result objectForKey:@"status"] intValue]==200){
             if (dataTypeLayer==1) {
                 [self parserParkingResponse:result];
@@ -1259,7 +1346,7 @@
     if ([list isKindOfClass:[NSArray class]]) {
         for (int i=0; i<[list count]; i++) {
             NSDictionary* dc=[list objectAtIndex:i];
-            NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:[dc objectForKey:@"parkName"],@"title",[dc objectForKey:@"parkId"],@"poiId",[dc objectForKey:@"parkType"],@"typeDes",[dc objectForKey:@"address"],@"address",[self caclDistance:dc],@"distance",[self caclGpsValue:[dc objectForKey:@"y"] forType:0],@"latitude",[self caclGpsValue:[dc objectForKey:@"x"] forType:1],@"longitude",@"1",@"dataType",[NSString stringWithFormat:@"%d",(i+1)],@"idx",[dc objectForKey:@"charge"],@"charge",[dc objectForKey:@"chargeDetail"],@"chargeDetail",@"0",@"price",[dc objectForKey:@"totalCount"],@"totalCount",[dc objectForKey:@"freeCount"],@"freeCount",[dc objectForKey:@"freeStatus"],@"freeStatus",@"1",@"sourceType",@"0579",@"cityCode",@"330702",@"adCode", nil];
+            NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:[dc objectForKey:@"parkName"],@"title",[dc objectForKey:@"parkId"],@"poiId",[dc objectForKey:@"parkType"],@"typeDes",[dc objectForKey:@"address"],@"address",[self caclDistance:dc],@"distance",[self caclGpsValue:[dc objectForKey:@"y"] forType:0],@"latitude",[self caclGpsValue:[dc objectForKey:@"x"] forType:1],@"longitude",@"1",@"dataType",[NSString stringWithFormat:@"%d",(i+1)],@"idx",[dc objectForKey:@"charge"],@"charge",[dc objectForKey:@"chargeDetail"],@"chargeDetail",@"0",@"price",[dc objectForKey:@"totalCount"],@"totalCount",[dc objectForKey:@"freeCount"],@"freeCount",[dc objectForKey:@"freeStatus"],@"freeStatus",@"1",@"sourceType",@"0579",@"cityCode",@"330702",@"adCode",[dc objectForKey:@"shopHours"],@"shopHours",[dc objectForKey:@"thumbUrl"],@"thumbUrl",[dc objectForKey:@"parkRiveType"],@"parkRiveType", nil];
             [data addObject:dict];
         }
         sourceType=1;
@@ -1267,8 +1354,9 @@
         HLog(@"----->%@",[NSString currentTime:formater]);
         [self insertDB];
         HLog(@"----->%@",[NSString currentTime:formater]);
-
-        [self readDBData];
+        NSString* lat=[NSString stringWithFormat:@"%.6f",[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue]];
+        NSString* lng=[NSString stringWithFormat:@"%.6f",[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]];
+        [self readDBData:lat forLng:lng];
         HLog(@"----end-->%@",[NSString currentTime:formater]);
     }
 }
@@ -1278,6 +1366,16 @@
 {
     MAMapPoint point1 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue],[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]));
     MAMapPoint point2 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[self caclGpsValue:[dict objectForKey:@"y"] forType:0] floatValue],[[self caclGpsValue:[dict objectForKey:@"x"] forType:1] floatValue]));
+    //计算距离
+    CLLocationDistance distance = MAMetersBetweenMapPoints(point1,point2);
+    NSString* distanceStr=[NSString stringWithFormat:@"%.0f",distance];
+    return distanceStr;
+}
+
+-(NSString*)caclDistanceForEntity:(PoiInfoEntity*)entity
+{
+    MAMapPoint point1 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue],[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]));
+    MAMapPoint point2 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([entity.latitude floatValue],[entity.longitude floatValue]));
     //计算距离
     CLLocationDistance distance = MAMetersBetweenMapPoints(point1,point2);
     NSString* distanceStr=[NSString stringWithFormat:@"%.0f",distance];
@@ -1299,13 +1397,15 @@
     if ([list isKindOfClass:[NSArray class]]) {
         for (int i=0; i<[list count]; i++) {
             NSDictionary* dc=[list objectAtIndex:i];
-            NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:[dc objectForKey:@"bsName"],@"title",[dc objectForKey:@"bsId"],@"poiId",@"公共自行车",@"typeDes",[dc objectForKey:@"address"],@"address",[self caclDistance:dc],@"distance",[self caclGpsValue:[dc objectForKey:@"y"] forType:0],@"latitude",[self caclGpsValue:[dc objectForKey:@"x"] forType:1],@"longitude",@"2",@"dataType",[NSString stringWithFormat:@"%d",(i+1)],@"idx",@"0",@"charge",@"0",@"chargeDetail",@"0",@"price",[dc objectForKey:@"totalCount"],@"totalCount",[dc objectForKey:@"freeCount"],@"freeCount",@"0",@"freeStatus",@"1",@"sourceType",@"0579",@"cityCode",@"330702",@"adCode", nil];
+            NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:[dc objectForKey:@"bsName"],@"title",[dc objectForKey:@"bsId"],@"poiId",@"公共自行车",@"typeDes",[dc objectForKey:@"address"],@"address",[self caclDistance:dc],@"distance",[self caclGpsValue:[dc objectForKey:@"y"] forType:0],@"latitude",[self caclGpsValue:[dc objectForKey:@"x"] forType:1],@"longitude",@"2",@"dataType",[NSString stringWithFormat:@"%d",(i+1)],@"idx",@"0",@"charge",@"0",@"chargeDetail",@"0",@"price",[dc objectForKey:@"totalCount"],@"totalCount",[dc objectForKey:@"freeCount"],@"freeCount",@"0",@"freeStatus",@"1",@"sourceType",@"0579",@"cityCode",@"330702",@"adCode",@"0",@"shopHours",@"0",@"thumbUrl",@"0",@"parkRiveType", nil];
             [data addObject:dict];
         }
         sourceType=1;
         bSearchResult=YES;
         [self insertDB];
-        [self readDBData];
+        NSString* lat=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.latitude];
+        NSString* lng=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.longitude];
+        [self readDBData:lat forLng:lng];
     }
 }
 
@@ -1332,9 +1432,11 @@
 
 -(void)searchForAMapPOI:(AMapPOI*)poi
 {
-    currentCityCode=[NSString stringWithFormat:@"%@",poi.citycode];
-    currentAdCode=poi.adcode;
-    [btnSearch setTitle:poi.name forState:UIControlStateNormal];
+    if (dataTypeLayer<4) {
+        currentCityCode=[NSString stringWithFormat:@"%@",poi.citycode];
+        currentAdCode=poi.adcode;
+        [searchBar setText:poi.name];
+    }
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(poi.location.latitude, poi.location.longitude)];
     [keyPois removeAllObjects];
     bShowKeyword=NO;
@@ -1345,18 +1447,32 @@
     [self clearAllAnnotationPOI];
     searchKeyword=NO;
     bMoveing=YES;
-    bFirstOrTarget=YES;
-    KeyPOIAnnotation *pointAnnotation=[[KeyPOIAnnotation alloc] initWithPOI:poi];
-    [keyPois addObject:pointAnnotation];
-    [self.mapView addAnnotations:keyPois];
-    [self.mapView showAnnotations:keyPois animated:YES];
+    if (dataTypeLayer<4) {
+        bFirstOrTarget=YES;
+        KeyPOIAnnotation *pointAnnotation=[[KeyPOIAnnotation alloc] initWithPOI:poi];
+        [keyPois addObject:pointAnnotation];
+        [self.mapView addAnnotations:keyPois];
+        [self.mapView showAnnotations:keyPois animated:YES];
+    }else{
+        //搜索目的地停车场
+        dataTypeLayer=1;
+        [searchBar setText:@"停车场"];
+    }
     [UserDefaultHelper setObject:[NSString stringWithFormat:@"%.6f",poi.location.latitude] forKey:CONF_CURRENT_TARGET_LATITUDE];
     [UserDefaultHelper setObject:[NSString stringWithFormat:@"%.6f",poi.location.longitude] forKey:CONF_CURRENT_TARGET_LONGITUDE];
-    
-    if ([currentCityCode isEqualToString:@"0579"]&&dataTypeLayer<3) {
+    if (loadingHUD) {
+        [loadingHUD show:YES];
+    }
+    if ([currentCityCode isEqualToString:@"0579"]&&(dataTypeLayer==1||dataTypeLayer==2)) {
         HLog(@"search city %@   %d",currentCityCode,dataTypeLayer);
-        [self reloadFooterData];
-        [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%.6f",poi.location.longitude],@"longitude",[NSString stringWithFormat:@"%.6f",poi.location.latitude],@"latitude",poi.adcode,@"adCode", nil]];
+        if (dataTypeLayer==1) {
+            sourceType=1;
+            bSearchResult=YES;
+            [self performSelector:@selector(readLocalDB) withObject:nil afterDelay:0.5];
+        }else{
+            [self reloadFooterData];
+            [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%.6f",poi.location.longitude],@"longitude",[NSString stringWithFormat:@"%.6f",poi.location.latitude],@"latitude",poi.adcode,@"adCode", nil]];
+        }
         return;
     }
     
@@ -1375,7 +1491,6 @@
     poiRequest.location=[AMapGeoPoint locationWithLatitude:poi.location.latitude longitude:poi.location.longitude];
     poiRequest.requireExtension=YES;
     [self.searchAPI AMapPlaceSearch:poiRequest];
-    
 }
 
 -(void)serarchForMapCenter:(AMapGeoPoint*)point
@@ -1393,7 +1508,13 @@
     HLog(@"search city %@   %d",currentCityCode,dataTypeLayer);
     if ([currentCityCode isEqualToString:@"0579"]&&(dataTypeLayer==1||dataTypeLayer==2)) {
         [self reloadFooterData];
-        [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%.6f",point.longitude],@"longitude",[NSString stringWithFormat:@"%.6f",point.latitude],@"latitude",currentAdCode,@"adCode", nil]];
+        if (dataTypeLayer==1) {
+            sourceType=1;
+            bSearchResult=YES;
+            [self readDBData:[NSString stringWithFormat:@"%.6f",point.latitude] forLng:[NSString stringWithFormat:@"%.6f",point.longitude]];
+        }else {
+            [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%.6f",point.longitude],@"longitude",[NSString stringWithFormat:@"%.6f",point.latitude],@"latitude",currentAdCode,@"adCode", nil]];
+        }
         return;
     }
     HLog(@"%@,  %.6f  %.6f",currentSearchKeyword,point.latitude,point.longitude);
@@ -1437,20 +1558,33 @@
 
 -(void)viewStatusSwitch:(CustLayerPopup *)view forIndex:(NSInteger)idx
 {
-    [self readDBData];
+    NSString* lat=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.latitude];
+    NSString* lng=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.longitude];
+    sourceType=1;
+    bSearchResult=YES;
+    [self readDBData:lat forLng:lng];
     [self.layerPopup dismissMenuPopover];
 }
 
 -(void)viewTypeSwitch:(CustLayerPopup *)view forIndex:(NSInteger)idx
 {
+    NSString* lat=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.latitude];
+    NSString* lng=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.longitude];
+    sourceType=1;
+    bSearchResult=YES;
     
-    [self readDBData];
+    [self readDBData:lat forLng:lng];
     [self.layerPopup dismissMenuPopover];
 }
 
 -(void)viewChargeSwitch:(CustLayerPopup *)view forIndex:(NSInteger)idx
 {
-    [self readDBData];
+    NSString* lat=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.latitude];
+    NSString* lng=[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.longitude];
+    sourceType=1;
+    bSearchResult=YES;
+    
+    [self readDBData:lat forLng:lng];
     [self.layerPopup dismissMenuPopover];
 }
 
@@ -1466,7 +1600,10 @@
             break;
         }
         case 1:{
-            TrafficViewContrller* dController=[[TrafficViewContrller alloc] init];
+//            TrafficViewContrller* dController=[[TrafficViewContrller alloc] init];
+//            [self.navigationController pushViewController:dController animated:YES];
+            WebViewController *dController=[[WebViewController alloc]init];
+            dController.infoDict=[NSDictionary dictionaryWithObjectsAndKeys:@"http://www.i-carparking.com/info/toInfo_m.action",@"webUrl",@"1",@"dataType",@"交通公告",@"title", nil];
             [self.navigationController pushViewController:dController animated:YES];
             break;
         }
@@ -1579,6 +1716,9 @@
 -(void)searchForKeyword:(NSDictionary *)dict
 {
     HLog(@"%@",[dict objectForKey:@"title"]);
+    if([data count]>0){
+        [mFooterScrollView setPage:-1 animated:NO];
+    }
     [data removeAllObjects];
     [self clearAllAnnotationPOI];
     searchKeyword=NO;
@@ -1587,14 +1727,42 @@
         searchKeyword=YES;
     }
     currentSearchKeyword=[dict objectForKey:@"title"];
-    [btnSearch setTitle:[dict objectForKey:@"title"] forState:UIControlStateNormal];
+    [searchBar setText:[dict objectForKey:@"title"]];
+    if ([currentCityCode isEqualToString:@"0579"]&&(dataTypeLayer==1||dataTypeLayer==2)) {
+        if (dataTypeLayer==1) {
+            [UserDefaultHelper setObject:[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.latitude] forKey:CONF_CURRENT_TARGET_LATITUDE];
+            [UserDefaultHelper setObject:[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.longitude] forKey:CONF_CURRENT_TARGET_LONGITUDE];
+            sourceType=1;
+            bSearchResult=YES;
+            [self performSelector:@selector(readLocalDB) withObject:nil afterDelay:0.5];
+        }else{
+            [self reloadFooterData];
+            [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.longitude],@"longitude",[NSString stringWithFormat:@"%.6f",self.mapView.centerCoordinate.latitude],@"latitude",@"330702",@"adCode", nil]];
+        }
+        return;
+    }
+    
     AMapPlaceSearchRequest * poiRequest=[[AMapPlaceSearchRequest alloc]init];
-    poiRequest.searchType=AMapSearchType_PlaceAround;
     poiRequest.sortrule=1;
     poiRequest.offset=10;
     poiRequest.keywords=[dict objectForKey:@"title"];
-    poiRequest.location=[AMapGeoPoint locationWithLatitude:currentLatitude longitude:currentLongitude];
-    poiRequest.requireExtension=NO;
+    if (dataTypeLayer<4) {
+        poiRequest.searchType=AMapSearchType_PlaceAround;
+        if ([dict objectForKey:@"point"]) {
+            poiRequest.location=[AMapGeoPoint locationWithLatitude:currentLatitude longitude:currentLongitude];
+        }else{
+            poiRequest.location=[AMapGeoPoint locationWithLatitude:self.mapView.centerCoordinate.latitude longitude:self.mapView.centerCoordinate.longitude];
+        }
+        poiRequest.requireExtension=NO;
+    }else{
+        poiRequest.searchType=AMapSearchType_PlaceKeyword;
+        if ([dict objectForKey:@"cityCode"]) {
+            poiRequest.city=@[[dict objectForKey:@"cityCode"]];
+        }
+        bFirstOrTarget=YES;
+        poiRequest.requireExtension=YES;
+    }
+    
     [self.searchAPI AMapPlaceSearch:poiRequest];
 }
 
@@ -1605,7 +1773,7 @@
     searchKeyword=YES;  //周边搜索
     dataTypeLayer=0;
     currentSearchKeyword=[dict objectForKey:@"keyword"];
-    [btnSearch setTitle:[dict objectForKey:@"keyword"] forState:UIControlStateNormal];
+    [searchBar setText:[dict objectForKey:@"keyword"]];
     AMapPlaceSearchRequest * poiRequest=[[AMapPlaceSearchRequest alloc]init];
     poiRequest.searchType=AMapSearchType_PlaceAround;
     poiRequest.sortrule=1;
@@ -1620,7 +1788,7 @@
 {
     currentCityCode=entity.cityCode;
     currentAdCode=entity.adCode;
-    [btnSearch setTitle:entity.keyword forState:UIControlStateNormal];
+    [searchBar setText:entity.keyword];
     bShowKeyword=NO;
     if ([data count]>0) {
         [mFooterScrollView setPage:-1 animated:NO];
@@ -1637,14 +1805,23 @@
     [keyPois addObject:pointAnnotation];
     [self.mapView addAnnotations:keyPois];
     [self.mapView showAnnotations:keyPois animated:YES];
+    if (loadingHUD) {
+        [loadingHUD show:YES];
+    }
     
     [UserDefaultHelper setObject:[NSString stringWithFormat:@"%@",entity.latitude] forKey:CONF_CURRENT_TARGET_LATITUDE];
     [UserDefaultHelper setObject:[NSString stringWithFormat:@"%@",entity.longitude] forKey:CONF_CURRENT_TARGET_LONGITUDE];
     
-    if ([currentCityCode isEqualToString:@"0579"]&&dataTypeLayer<3) {
+    if ([currentCityCode isEqualToString:@"0579"]&&(dataTypeLayer==1||dataTypeLayer==2)) {
         HLog(@"search city %@   %d",currentCityCode,dataTypeLayer);
-        [self reloadFooterData];
-        [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@",entity.longitude],@"longitude",[NSString stringWithFormat:@"%@",entity.latitude],@"latitude",entity.adCode,@"adCode", nil]];
+        if (dataTypeLayer==1) {
+            sourceType=1;
+            bSearchResult=YES;
+            [self performSelector:@selector(readLocalDB) withObject:nil afterDelay:0.5];
+        }else{
+            [self reloadFooterData];
+            [self searchLocalAMapPOI:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@",entity.longitude],@"longitude",[NSString stringWithFormat:@"%@",entity.latitude],@"latitude",entity.adCode,@"adCode", nil]];
+        }
         return;
     }
     AMapPlaceSearchRequest * poiRequest=[[AMapPlaceSearchRequest alloc]init];
@@ -1671,7 +1848,7 @@
     searchKeyword=YES;
     bFirstOrTarget=YES;
     currentSearchKeyword=tip.name;
-    [btnSearch setTitle:tip.name forState:UIControlStateNormal];
+    [searchBar setText:tip.name];
     AMapPlaceSearchRequest * poiRequest=[[AMapPlaceSearchRequest alloc]  init];
     poiRequest.searchType=AMapSearchType_PlaceKeyword;
     poiRequest.keywords=tip.name;
@@ -1731,18 +1908,18 @@
             POIAnnotation *poiA=(POIAnnotation*)an;
             if ([poiA index]==idx) {
                 if (poiA.entity) {
-                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPoiInfoEntity:poiA.entity index:idx isSelected:YES];
+                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPoiInfoEntity:poiA.entity forType:poiA.dataType index:idx isSelected:YES];
                     [annotations addObject:poi];
                 }else{
-                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:poiA.poi index:idx isSelected:YES];
+                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:poiA.poi forType:poiA.dataType index:idx isSelected:YES];
                     [annotations addObject:poi];
                 }
             }else{
                 if (poiA.entity) {
-                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPoiInfoEntity:poiA.entity index:[poiA index] isSelected:NO];
+                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPoiInfoEntity:poiA.entity forType:poiA.dataType index:[poiA index] isSelected:NO];
                     [annotations addObject:poi];
                 }else{
-                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:poiA.poi index:[poiA index] isSelected:NO];
+                    POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:poiA.poi forType:poiA.dataType index:[poiA index] isSelected:NO];
                     [annotations addObject:poi];
                 }
                 
@@ -1787,7 +1964,7 @@
 
 -(void)insertDB
 {
-    [[DBManager getInstance] deleteAllPoiInfo];
+    [[DBManager getInstance] deletePoiInfo:0 forDataType:dataTypeLayer];
     for (NSDictionary* dict in data) {
         [[DBManager getInstance] insertOrUpdatePoiInfo:dict];
     }
@@ -1802,28 +1979,29 @@
     if ([keyPois count]>0) {
         [self.mapView addAnnotations:keyPois];
     }
+    if ([advPois count]>0) {
+        [self loadAdvSearchData];
+    }
 }
 
-//-(void)clearAnnotationPOI:(NSInteger)type
-//{
-//    [self.mapView removeAnnotations:self.mapView.annotations];
-//    return;
-// 
-//    NSArray* array=self.mapView.annotations;
-//    NSMutableArray* annotations=[[NSMutableArray alloc]init];
-//    for ( int i=0;i<[array count];i++) {
-//        id <MAAnnotation> an=[array objectAtIndex:i];
-//        if ([an isKindOfClass:[POIAnnotation class]]&&type==0) {
-//            [annotations addObject:an];
-//        }else if ([an isKindOfClass:[CustPOIAnnotation class]]&&type==1) {
-//            [annotations addObject:an];
-//        }else if ([an isKindOfClass:[KeyPOIAnnotation class]]&&type==1000) {
-//            [annotations addObject:an];
-//        }else if ([an isKindOfClass:[TPOIAnnotation class]]&&type==0) {
-//            [annotations addObject:an];
-//        }
-//    }
-//    [self.mapView removeAnnotations:annotations];
-//}
+#pragma mark - SearchBarDelegate
+
+-(BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar
+{
+    [UserDefaultHelper setObject:@"0" forKey:CONF_MAP_TO_LIST];
+    [UserDefaultHelper setObject:@"0" forKey:CONF_LIST_TO_MAP];
+    SearchViewController *dController=[[SearchViewController alloc]init];
+    dController.searchType=0;
+    dController.cityCode=currentCityCode;
+    [dController setStartPoint:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%f",currentLatitude],@"latitude",[NSString stringWithFormat:@"%f",currentLongitude],@"longitude", nil]];
+    [self.navigationController pushViewController:dController animated:YES];
+    
+    return NO;
+}
+
+- (void)searchBarBookmarkButtonClicked:(UISearchBar *)searchBar
+{
+     [self startIFlyRecognizer];
+}
 
 @end

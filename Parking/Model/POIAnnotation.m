@@ -12,10 +12,12 @@
 @property(nonatomic,readwrite,strong)PoiInfoEntity  *entity;
 @property (nonatomic,readwrite,strong)AMapPOI *poi;
 @property (nonatomic,readwrite,assign)NSInteger index;
+@property (nonatomic,readwrite,assign)NSInteger dataType;
 @property (nonatomic,readwrite,assign)BOOL      isSelected;
 @end
 @implementation POIAnnotation
 @synthesize poi=_poi;
+@synthesize dataType=_dataType;
 @synthesize index=_index;
 @synthesize isSelected=_isSelected;
 @synthesize entity=_entity;
@@ -44,20 +46,22 @@
     return CLLocationCoordinate2DMake(self.poi.location.latitude, self.poi.location.longitude);
 }
 
--(id)initWithPOI:(AMapPOI *)poi index:(NSInteger)idx isSelected:(BOOL)sel
+-(id)initWithPOI:(AMapPOI *)poi forType:(NSInteger)dType index:(NSInteger)idx isSelected:(BOOL)sel
 {
     if (self==[super init]) {
         self.poi=poi;
+        self.dataType=dType;
         self.index=idx;
         self.isSelected=sel;
     }
     return self;
 }
 
--(id)initWithPoiInfoEntity:(PoiInfoEntity *)entity index:(NSInteger)idx isSelected:(BOOL)sel
+-(id)initWithPoiInfoEntity:(PoiInfoEntity *)entity forType:(NSInteger)dType index:(NSInteger)idx isSelected:(BOOL)sel
 {
     if (self==[super init]) {
         self.entity=entity;
+        self.dataType=dType;
         self.index=idx;
         self.isSelected=sel;
     }

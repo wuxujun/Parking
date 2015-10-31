@@ -23,7 +23,7 @@ static FMDatabase *db;
 + (void)initDatabase
 {
     NSInteger vs=[[[NSUserDefaults standardUserDefaults] objectForKey:CONF_DATABASE_VERSION] integerValue];
-    if (vs<9) {
+    if (vs<18) {
         if ([[NSFileManager defaultManager] fileExistsAtPath:DB_FILE_IN_DOCUMENT]){
             [[NSFileManager defaultManager] removeItemAtPath:DB_FILE_IN_DOCUMENT error:nil];
         }

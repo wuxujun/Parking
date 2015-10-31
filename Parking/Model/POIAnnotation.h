@@ -13,11 +13,12 @@
 
 @interface POIAnnotation : NSObject<MAAnnotation>
 
--(id)initWithPOI:(AMapPOI*)poi index:(NSInteger)idx  isSelected:(BOOL)sel;
--(id)initWithPoiInfoEntity:(PoiInfoEntity*)entity index:(NSInteger)idx  isSelected:(BOOL)sel;
+-(id)initWithPOI:(AMapPOI*)poi forType:(NSInteger)dType index:(NSInteger)idx  isSelected:(BOOL)sel;
+-(id)initWithPoiInfoEntity:(PoiInfoEntity*)entity forType:(NSInteger)dType index:(NSInteger)idx  isSelected:(BOOL)sel;
 
 @property(nonatomic,readonly,strong) PoiInfoEntity*  entity;
 @property(nonatomic,readonly,strong) AMapPOI *poi;
+@property(nonatomic,readonly,assign)NSInteger   dataType;
 @property(nonatomic,readonly,assign)NSInteger   index;
 @property(nonatomic,readonly,assign)BOOL        isSelected;
 @property(nonatomic,readonly)CLLocationCoordinate2D     coordinate;

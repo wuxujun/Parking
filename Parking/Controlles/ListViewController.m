@@ -39,103 +39,19 @@
     currentCharge=@"0";
     currentType=@"0";
     
-//    if (self.sourceType==1&&self.dataType==1) {
-//        _tableView.frame=CGRectMake(0, 44, self.view.frame.size.width, self.view.frame.size.height-44);
-//        [self initHeadView];
-//    }
     _tableView.separatorStyle=UITableViewCellSeparatorStyleSingleLine;
 }
 
--(void)initHeadView
+-(NSString*)caclDistanceForEntity:(PoiInfoEntity*)entity
 {
-    float width=self.view.frame.size.width;
-    UIView* headView=[[UIView alloc]initWithFrame:CGRectMake(0, 64, width, 40)];
-    [headView setBackgroundColor:[UIColor whiteColor]];
-    if (cityButton==nil) {
-        cityButton=[[UIButton alloc]initWithFrame:CGRectMake(0, 0, width/2.0, 39)];
-        [cityButton setTitle:@"价格不限" forState:UIControlStateNormal];
-        [cityButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [cityButton.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
-        [cityButton addTarget:self action:@selector(citySelected:) forControlEvents:UIControlEventTouchUpInside];
-        [headView addSubview:cityButton];
-    }
-    if (typeButton==nil) {
-        typeButton=[[UIButton alloc]initWithFrame:CGRectMake(width/2.0, 0, width/2.0, 39)];
-        [typeButton.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
-        [typeButton setTitle:@"全部分类" forState:UIControlStateNormal];
-        [typeButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        [typeButton addTarget:self action:@selector(typeSelected:) forControlEvents:UIControlEventTouchUpInside];
-        [headView addSubview:typeButton];
-    }
-    UIImageView *line=[[UIImageView alloc]initWithFrame:CGRectMake(0, 40, width, 0.5f)];
-    [line setBackgroundColor:DEFAULT_LINE_COLOR];
-    [headView addSubview:line];
-    [self.view addSubview:headView];
+    MAMapPoint point1 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE] floatValue],[[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE] floatValue]));
+    MAMapPoint point2 = MAMapPointForCoordinate(CLLocationCoordinate2DMake([entity.latitude floatValue],[entity.longitude floatValue]));
+    //计算距离
+    CLLocationDistance distance = MAMetersBetweenMapPoints(point1,point2);
+    NSString* distanceStr=[NSString stringWithFormat:@"%.0f",distance];
+    return distanceStr;
 }
 
--(IBAction)citySelected:(id)sender
-{
-    SIAlertView* alertView=[[SIAlertView alloc]initWithTitle:nil andMessage:nil];
-    [alertView addButtonWithTitle:@"价格不限" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentCharge=@"2";
-        [cityButton setTitle:@"价格不限" forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentCharge forKey:CONF_PARKING_MAP_CHARGE];
-        [self loadLocalData];
-    }];
-    [alertView addButtonWithTitle:@"免费" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentCharge=@"0";
-        [cityButton setTitle:@"免费" forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentCharge forKey:CONF_PARKING_MAP_CHARGE];
-        [self loadLocalData];
-    }];
-    [alertView addButtonWithTitle:@"收费" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentCharge=@"1";
-        [cityButton setTitle:@"收费" forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentCharge forKey:CONF_PARKING_MAP_CHARGE];
-        [self loadLocalData];
-    }];
-    alertView.transitionStyle=SIAlertViewTransitionStyleSlideFromTop;
-    [alertView show];
-    
-}
-
--(IBAction)typeSelected:(id)sender
-{
-    SIAlertView* alertView=[[SIAlertView alloc]initWithTitle:nil andMessage:nil];
-    
-    [alertView addButtonWithTitle:@"全部类型" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentType=@"0";
-        [typeButton setTitle:@"全部类型" forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentType forKey:CONF_PARKING_MAP_TYPE];
-        [self loadLocalData];
-    }];
-    [alertView addButtonWithTitle:@"道路停车场" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentType=@"道路停车场";
-        [typeButton setTitle:currentType forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentType forKey:CONF_PARKING_MAP_TYPE];
-        [self loadLocalData];
-    }];
-    [alertView addButtonWithTitle:@"地面停车场" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentType=@"地面停车场";
-        [typeButton setTitle:currentType forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentType forKey:CONF_PARKING_MAP_TYPE];
-        [self loadLocalData];
-    }];
-    [alertView addButtonWithTitle:@"地下停车场" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentType=@"地下停车场";
-        [typeButton setTitle:currentType forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentType forKey:CONF_PARKING_MAP_TYPE];
-        [self loadLocalData];
-    }];
-    [alertView addButtonWithTitle:@"其他" type:SIAlertViewButtonTypeDefault handler:^(SIAlertView *alertView) {
-        currentType=@"其他";
-        [typeButton setTitle:currentType forState:UIControlStateNormal];
-        [UserDefaultHelper setObject:currentType forKey:CONF_PARKING_MAP_TYPE];
-        [self loadLocalData];
-    }];
-    alertView.transitionStyle=SIAlertViewTransitionStyleSlideFromTop;
-    [alertView show];
-}
 -(void)loadLocalData
 {
     [_datas removeAllObjects];
@@ -147,9 +63,45 @@
         status=@"0";
         type=@"0";
     }
-    NSArray* array=[[DBManager getInstance] queryPoiInfo:charge forType:type forStatus:status];
-    if ([array count]>0) {
-        [_datas addObjectsFromArray:array];
+    NSString* lat=[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LATITUDE];
+    NSString* lng=[UserDefaultHelper objectForKey:CONF_CURRENT_TARGET_LONGITUDE];
+
+    if (self.sourceType==0) {
+        NSArray* array=[[DBManager getInstance] queryOtherCity];
+        if ([array count]>0) {
+            [_datas addObjectsFromArray:array];
+        }
+    }else{
+       NSArray* array=[[DBManager getInstance] queryPoiInfo:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_CHARGE] forType:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_TYPE] forStatus:[UserDefaultHelper objectForKey:CONF_PARKING_MAP_STATUS] forLat:lat forLng:lng];
+        if ([array count]>0) {
+            int idx=0;
+            NSMutableArray  *localDatas=[[NSMutableArray alloc]init];
+            for (PoiInfoEntity *entity in array) {
+                NSDictionary* dict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%@",[self caclDistanceForEntity:entity]],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode",entity.freeStatus,@"freeStatus",entity.shopHours,@"shopHours",entity.thumbUrl,@"thumbUrl", nil];
+                [localDatas addObject:dict];
+            }
+            //排序
+            NSArray* pois=[localDatas sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+                NSDictionary* p1=(NSDictionary*)obj1;
+                NSDictionary* p2=(NSDictionary*)obj2;
+                if ([[p1 objectForKey:@"distance"] integerValue]<[[p2 objectForKey:@"distance"] integerValue]) {
+                    return NSOrderedAscending;
+                }else if([[p1 objectForKey:@"distance"] integerValue]>[[p2 objectForKey:@"distance"] integerValue]){
+                    return NSOrderedDescending;
+                }else{
+                    return NSOrderedSame;
+                }
+            }];
+            //重置序号
+            for (NSDictionary *entity in pois) {
+                NSMutableDictionary* dict=[NSMutableDictionary dictionaryWithDictionary:entity];
+                [dict setObject:[NSString stringWithFormat:@"%d",(idx+1)] forKey:@"idx"];
+                //                HLog(@"%@",dict);
+                [_datas addObject:dict];
+                idx++;
+            }
+        }
+
     }
     [_tableView reloadData];
 }
@@ -205,12 +157,19 @@
     if(cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
     }
-    
-    PoiInfoEntity* entity=[_datas objectAtIndex:indexPath.row];
-    if (entity) {
+    if (self.sourceType==0) {
+        PoiInfoEntity* entity=[_datas objectAtIndex:indexPath.row];
+        if (entity) {
+            ListViewCell* item=[[ListViewCell alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 100) delegate:self];
+            item.dataType=self.dataType;
+            item.infoDict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%d",entity.distance],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",[NSString stringWithFormat:@"%d",entity.idx],@"idx",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode",entity.freeStatus,@"freeStatus",entity.shopHours,@"shopHours",entity.thumbUrl,@"thumbUrl", nil];
+            [cell addSubview:item];
+        }
+    }else{
+        NSDictionary* dict=[_datas objectAtIndex:indexPath.row];
         ListViewCell* item=[[ListViewCell alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 100) delegate:self];
         item.dataType=self.dataType;
-        item.infoDict=[NSDictionary dictionaryWithObjectsAndKeys:entity.title,@"title",entity.poiId,@"poiId",entity.typeDes,@"typeDes",entity.address,@"address",[NSString stringWithFormat:@"%d",entity.distance],@"distance",entity.latitude,@"latitude",entity.longitude,@"longitude",[NSString stringWithFormat:@"%d",entity.dataType],@"dataType",[NSString stringWithFormat:@"%d",entity.idx],@"idx",entity.charge,@"charge",entity.chargeDetail,@"chargeDetail",@"0",@"price",[NSString stringWithFormat:@"%d",entity.totalCount],@"totalCount",[NSString stringWithFormat:@"%d",entity.freeCount],@"freeCount",[NSString stringWithFormat:@"%d",entity.sourceType],@"sourceType",entity.cityCode,@"cityCode",entity.adCode,@"adCode",entity.freeStatus,@"freeStatus", nil];
+        item.infoDict=dict;
         [cell addSubview:item];
     }
     cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;

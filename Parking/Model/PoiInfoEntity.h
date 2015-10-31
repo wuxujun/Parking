@@ -31,6 +31,8 @@ typedef void(^SqlBlock)(NSString* sql,NSArray *arguments);
 @property(nonatomic,strong) NSString*   cityCode;
 @property(nonatomic,strong) NSString*   adCode;
 @property(nonatomic,assign) NSInteger    idx;
+@property(nonatomic,strong) NSString*   shopHours;
+@property(nonatomic,strong) NSString*   thumbUrl;
 
 +(void)generateInsertSql:(NSDictionary*)aInfo completion:(SqlBlock)completion;
 +(void)generateUpdateSql:(NSDictionary*)aInfo completion:(SqlBlock)completion;

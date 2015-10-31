@@ -19,6 +19,8 @@
     NSMutableArray      *photoDatas;
     NSMutableArray      *viewControllerArray;
 
+    NSInteger           currentPage;
+    NSInteger           endPage;
 }
 
 @end
@@ -37,7 +39,7 @@
     for (NSUInteger k=0 ; k<10; ++k) {
         [viewControllerArray addObject:[NSNull null]];
     }
-    
+   
     if (mScrollView==nil) {
         mScrollView=[[DMLazyScrollView alloc] initWithFrame:self.view.bounds];
         mScrollView.controlDelegate=self;
@@ -141,10 +143,25 @@
 -(void)lazyScrollView:(DMLazyScrollView *)pagingView currentPageChanged:(NSInteger)currentPageIndex
 {
     HLog(@"%d",currentPageIndex);
+    currentPage=currentPageIndex;
+    endPage=0;
 }
 
 -(void)lazyScrollViewDidEndDecelerating:(DMLazyScrollView *)pagingView atPageIndex:(NSInteger)pageIndex
 {
     HLog(@"%d",pageIndex);
+    if (pageIndex==currentPage) {
+        endPage++;
+    }
+    if (endPage==2) {
+        [self performSelector:@selector(openHomeView) withObject:nil afterDelay:0.5];
+    }
 }
+
+-(void)openHomeView
+{
+    [UserDefaultHelper setObject:[NSNumber numberWithBool:false] forKey:PRE_FIRST_OPEN];
+    [ApplicationDelegate openHomeView];
+}
+
 @end

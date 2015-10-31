@@ -52,6 +52,10 @@
         self.adCode=value;
     }else if([key isEqualToString:@"idx"]){
         self.idx=[value intValue];
+    }else if([key isEqualToString:@"shopHours"]){
+        self.shopHours=value;
+    }else if([key isEqualToString:@"thumbUrl"]){
+        self.thumbUrl=value;
     }
 }
 
@@ -67,7 +71,7 @@
 
 +(NSArray*)fields
 {
-    return [NSArray arrayWithObjects:@"pid",@"poiId",@"typeDes",@"idx",@"title",@"address",@"distance",@"totalCount",@"freeCount",@"charge",@"chargeDetail",@"price",@"latitude",@"longitude",@"sourceType",@"dataType",@"cityCode",@"adCode",@"freeStatus",@"parkRiveType", nil];
+    return [NSArray arrayWithObjects:@"pid",@"poiId",@"typeDes",@"idx",@"title",@"address",@"distance",@"totalCount",@"freeCount",@"charge",@"chargeDetail",@"price",@"latitude",@"longitude",@"sourceType",@"dataType",@"cityCode",@"adCode",@"freeStatus",@"parkRiveType",@"shopHours",@"thumbUrl", nil];
 }
 
 + (void)generateInsertSql:(NSDictionary *)aInfo completion:(SqlBlock)completion
@@ -99,7 +103,7 @@
     }
     
     NSString *sql = [NSString stringWithFormat:@"INSERT INTO t_poi_info (%@) values (%@)", [finalKeys componentsJoinedByString:@", "], [placeholder componentsJoinedByString:@", "]];
-//    HLog(@"%@",sql);
+//    HLog(@"%@  %@ ",sql,finalValues);
     if (completion) {
         completion(sql, finalValues);
     }
@@ -113,32 +117,37 @@
     NSMutableArray *kvPairs = [NSMutableArray array];
     NSMutableArray *finalValues = [NSMutableArray array];
     
-    NSNumber *mID = nil;
+    NSString *mID = nil;
+    NSNumber * mDataType=nil;
     for (int i=0; i<values.count; i++) {
         NSString *value = values[i];
         NSString *key = keys[i];
         
         NSArray *integerKeyArray = @[@"pid", @"idx",@"distance",@"totalCount",@"freeCount",@"price",@"sourceType",@"dataType"];
         if ([integerKeyArray containsObject:key]) {
-            if ([key isEqualToString:@"pid"]) {
-                mID = @([value integerValue]);
+            if ([key isEqualToString:@"dataType"]) {
+                mDataType = @([value integerValue]);
             }else{
                 [finalValues addObject:@([value integerValue])];
                 [kvPairs addObject:[NSString stringWithFormat:@"%@=?", keys[i]]];
             }
         }
         else{
-            if (![value isEqual:[NSNull null]] && value.length > 0) {
-                [finalValues addObject:value];
+            if ([@"poiId" isEqualToString:key]) {
+                mID=value;
             }else{
-                [finalValues addObject:@""];
+                if (![value isEqual:[NSNull null]] && value.length > 0) {
+                    [finalValues addObject:value];
+                }else{
+                    [finalValues addObject:@""];
+                }
+                [kvPairs addObject:[NSString stringWithFormat:@"%@=?", keys[i]]];
             }
-            [kvPairs addObject:[NSString stringWithFormat:@"%@=?", keys[i]]];
         }
     }
     
-    NSString *sql = [NSString stringWithFormat:@"UPDATE t_poi_info set %@ WHERE pid=%@", [kvPairs componentsJoinedByString:@", " ], mID];
-    HLog(@"%@",sql);
+    NSString *sql = [NSString stringWithFormat:@"UPDATE t_poi_info set %@ WHERE poiId='%@' and dataType=%@", [kvPairs componentsJoinedByString:@", " ], mID,mDataType];
+//    HLog(@"%@",sql);
     if (completion) {
         completion(sql, finalValues);
     }

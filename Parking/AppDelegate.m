@@ -18,6 +18,7 @@
 #import "SearchHisEntity.h"
 #import "Reachability.h"
 #import "SIAlertView.h"
+#import "StringUtil.h"
 
 #import <AMapNaviKit/AMapNaviKit.h>
 #import "iflyMSC/IFlySpeechSynthesizer.h"
@@ -100,6 +101,7 @@ static NSString *const kAllowTracking=@"allowTracking";
     [self checkNetwork];
     
     [self initConfigData];
+//    [[UIApplication sharedApplication] setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
     
 #if TARGET_IPHONE_SIMULATOR
     NSLog(@" TARGET_IPHONE_SIMULATOR is not support Notification ");
@@ -198,6 +200,9 @@ static NSString *const kAllowTracking=@"allowTracking";
 
 -(void)initConfigData
 {
+    if (![UserDefaultHelper objectForKey:CONF_NETWORK_TYPE]) {
+        [UserDefaultHelper setObject:@"0" forKey:CONF_NETWORK_TYPE];
+    }
     if(![UserDefaultHelper objectForKey:PRE_FIRST_OPEN]){
         [UserDefaultHelper setObject:[NSNumber numberWithBool:true] forKey:PRE_FIRST_OPEN];
     }
@@ -249,7 +254,6 @@ static NSString *const kAllowTracking=@"allowTracking";
     [UMSocialWechatHandler setWXAppId:APPKEY_WEIXIN appSecret:APPSECRET_WEIXIN url:APPSHARE_URL];
     [UMSocialSinaHandler openSSOWithRedirectURL:@"http://sns.whalecloud.com/sina2/callback"];
     
-    
     self.networkEngine=[[HNetworkEngine alloc]initWithHostName:nil customHeaderFields:nil];
     NSString*   requestUrl=[NSString stringWithFormat:@"%@link",kHttpUrl];
     NSMutableDictionary* params=[NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithObjectsAndKeys:kAppId,@"appid",@"GBK",@"charset", nil]];
@@ -264,12 +268,11 @@ static NSString *const kAllowTracking=@"allowTracking";
     } error:^(NSError *error) {
             NSLog(@"post deviceToken fail");
     }];
-    
-    
 }
 
 -(void)autoLogin
 {
+    [self onDataUpdate];
     HCurrentUserContext* userContext=[HCurrentUserContext sharedInstance];
     if (userContext.uid) {
         [userContext loginWithUserName:[UserDefaultHelper objectForKey:PRE_LOGIN_USER] password:[UserDefaultHelper objectForKey:PRE_LOGIN_PASSWORD] success:^(MKNetworkOperation *completedOperation, id result) {
@@ -278,9 +281,90 @@ static NSString *const kAllowTracking=@"allowTracking";
             HLog(@"%@",error);
         }];
     }
-    
 }
-							
+
+-(void)onDataUpdate
+{
+    NSInteger count=[[[DBManager getInstance] queryLocalPoiInfo] count];
+    if (count<=0) {
+        [self parkingDataRequest:@"0" forStart:0];
+    }else{
+        timer=[NSTimer scheduledTimerWithTimeInterval:60.0*8 target:self selector:@selector(onDataGet:) userInfo:nil repeats:YES];
+    }
+}
+
+-(void)onDataGet:(NSTimer *)timer
+{
+    [self parkingDataRequest:@"0" forStart:0];
+}
+
+-(void)parkingDataRequest:(NSString*)region forStart:(NSInteger)start
+{
+    NSString* requestUrl=[NSString stringWithFormat:@"%@downgrade_service/paging_parking_list",kHttpUrl];
+    NSMutableDictionary* params=[[NSMutableDictionary alloc]init];
+     self.region=region;
+    if (![region isEqualToString:@"0"]) {
+        [params setObject:region forKey:@"region"];
+    }
+    [params setObject:[NSNumber numberWithInteger:start] forKey:@"startIndex"];
+    [params setObject:[NSNumber numberWithInteger:100] forKey:@"getCount"];
+    
+    [self.networkEngine postOperationWithURLString:requestUrl params:params success:^(MKNetworkOperation *completedOperation, id result) {
+        if([[result objectForKey:@"status"] intValue]==200){
+            [self parserParkingResponse:result];
+        }
+    } error:^(NSError *error) {
+        HLog(@"%@",error);
+    }];
+}
+
+-(void)parserParkingResponse:(NSDictionary*)result
+{
+    id list=[result objectForKey:@"parkingList"];
+    NSInteger startIndex=[[result objectForKey:@"startIndex"] integerValue];
+    NSInteger dataCount=[[result objectForKey:@"dataCount"] integerValue];
+    NSInteger getCount=[[result objectForKey:@"getCount"] integerValue];
+    
+    if ([list isKindOfClass:[NSArray class]]) {
+        for (int i=0; i<[list count]; i++) {
+            NSDictionary* dc=[list objectAtIndex:i];
+            NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:[dc objectForKey:@"parkName"],@"title",[dc objectForKey:@"parkId"],@"poiId",[dc objectForKey:@"parkType"],@"typeDes",[dc objectForKey:@"address"],@"address",@"0",@"distance",[self caclGpsValue:[dc objectForKey:@"y"] forType:0],@"latitude",[self caclGpsValue:[dc objectForKey:@"x"] forType:1],@"longitude",@"1",@"dataType",[NSString stringWithFormat:@"%d",(i+1)],@"idx",[dc objectForKey:@"charge"],@"charge",[dc objectForKey:@"chargeDetail"],@"chargeDetail",@"0",@"price",[dc objectForKey:@"totalCount"],@"totalCount",[dc objectForKey:@"freeCount"],@"freeCount",[dc objectForKey:@"freeStatus"],@"freeStatus",@"1",@"sourceType",@"0579",@"cityCode",@"330702",@"adCode",[dc objectForKey:@"shopHours"],@"shopHours",[dc objectForKey:@"thumbUrl"],@"thumbUrl",[dc objectForKey:@"parkRiveType"],@"parkRiveType", nil];
+            [[DBManager getInstance] insertOrUpdatePoiInfo:dict];
+        }
+    }
+    if ((startIndex+getCount)<dataCount) {
+        [self parkingDataRequest:self.region forStart:(startIndex+getCount)];
+    }
+    NSDateFormatter* formater=[[NSDateFormatter alloc]init];
+    formater.dateFormat=@"mm-dd HH:mm:ss SSS";
+    HLog(@"%@   %@  %d  %d   %d",[NSString currentTime:formater],self.region,dataCount,startIndex,getCount);
+}
+
+-(NSString*)caclGpsValue:(NSString* )val forType:(NSInteger)type
+{
+    NSMutableString* newString=[[NSMutableString alloc]initWithCapacity:val.length];
+    for (int i=val.length-1; i>=0; i--) {
+        unichar ch=[val characterAtIndex:i];
+        [newString appendFormat:@"%c",ch];
+    }
+    float value=0.0;
+    if (type==0) {
+        value=(30000000+[newString integerValue])/1000000.0;
+    }else{
+        value=(120000000+[newString integerValue])/1000000.0;
+    }
+    
+    return [NSString stringWithFormat:@"%.6f",value];
+}
+
+//-(void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+//{
+//    NSLog(@"....performFetchWithCompletionHandler..");
+//    [self parkingDataRequest:@"330702" forStart:0];
+//    completionHandler(UIBackgroundFetchResultNewData);
+//    application.applicationIconBadgeNumber+=1;
+//}
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -299,6 +383,9 @@ static NSString *const kAllowTracking=@"allowTracking";
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_SEARCH_NEARBY_KEYWORK object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NOTIFICATION_MAPSELECT_DONE object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kReachabilityChangedNotification object:nil];
+    if (timer) {
+        [timer setFireDate:[NSDate distantFuture]];
+    }
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -311,8 +398,10 @@ static NSString *const kAllowTracking=@"allowTracking";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSearchHisKeyword:) name:NOTIFICATION_SEARCH_HIS_KEYWORK object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onMapSelectDone:) name:NOTIFICATION_MAPSELECT_DONE object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
-
-    
+    if (timer) {
+        [timer setFireDate:[NSDate distantPast]];
+    }
+    application.applicationIconBadgeNumber=0;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -403,6 +492,7 @@ static NSString *const kAllowTracking=@"allowTracking";
 {
     Reachability* reach=[sender object];
     if ([reach isReachable]) {
+        [UserDefaultHelper setObject:reach.currentReachabilityString forKey:CONF_NETWORK_TYPE];
         HLog(@"%@",reach.currentReachabilityString);
     }else{
         HLog(@"----->%@",reach.currentReachabilityString);

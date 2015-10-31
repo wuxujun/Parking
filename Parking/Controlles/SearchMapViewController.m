@@ -229,7 +229,7 @@
         NSDictionary *dict=[NSDictionary dictionaryWithObjectsAndKeys:p.name,@"title",p.uid,@"uid",p.type,@"type",p.address,@"address",[NSString stringWithFormat:@"%@",[NSString caleDistance:p.distance]],@"distance",[NSString stringWithFormat:@"%f",p.location.latitude],@"latitude",[NSString stringWithFormat:@"%f",p.location.longitude],@"longitude",@"0",@"dataType",[NSString stringWithFormat:@"%ld",(idx+1)],@"index",@"无",@"price",@"0",@"dataType", nil];
         [data addObject:dict];
             //            HLog(@"%@",dict);
-        [poiAnnotations addObject:[[POIAnnotation alloc] initWithPOI:p index:idx isSelected:NO]];
+        [poiAnnotations addObject:[[POIAnnotation alloc] initWithPOI:p forType:4 index:idx isSelected:NO]];
         
     }];
     [self.mapView removeAnnotations:self.mapView.annotations];
@@ -429,12 +429,13 @@
     for ( int i=0;i<[array count];i++) {
         id <MAAnnotation> an=[array objectAtIndex:i];
         if ([an isKindOfClass:[POIAnnotation class]]) {
+            POIAnnotation* poiA=(POIAnnotation*)an;
             if ([(POIAnnotation*)an index]==idx) {
-                POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:[(POIAnnotation*)an poi] index:idx isSelected:YES];
+                POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:[(POIAnnotation*)an poi] forType:poiA.dataType index:idx isSelected:YES];
                 [self.mapView removeAnnotation:an];
                 [self.mapView addAnnotation:poi];
             }else{
-                POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:[(POIAnnotation*)an poi] index:[(POIAnnotation*)an index] isSelected:NO];
+                POIAnnotation *poi=[[POIAnnotation alloc]initWithPOI:[(POIAnnotation*)an poi] forType:poiA.dataType index:[(POIAnnotation*)an index] isSelected:NO];
                 [self.mapView removeAnnotation:an];
                 [self.mapView addAnnotation:poi];
             }
